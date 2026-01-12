@@ -42,6 +42,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Local apps
+    'product',
+    'account',
+    'order',
+
+    # Third-party apps
+    'django_summernote',
+    'crispy_forms',
+    'crispy_bootstrap5',
 ]
 
 MIDDLEWARE = [
