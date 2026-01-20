@@ -27,8 +27,15 @@ def look_up_cep(cep):
     cep_limpo = re.sub(r'[^0-9]', '', str(cep))
     url = f"https://viacep.com.br/ws/{cep_limpo}/json/"
     try:
-        response = requests.get(url, timeout=5)
-        data = response.json()
-        return not data.get('erro', False)
-    except:
-        return False
+        # Timeout de 2 segundos para não travar o servidor se a API demorar
+        response = requests.get(url, timeout=2)
+        if response.status_code == 200:
+            data = response.json()
+            # não retorna False (erro) se status code = 200
+            return not data.get('erro', False)
+    except (requests.exceptions.RequestException, requests.exceptions.Timeout):
+        # Se a API falhar, permitimos passar apenas pelo formato (8 dígitos) 
+        # para não impedir o cadastro do cliente por falha externa.
+        return True 
+    
+    return False
