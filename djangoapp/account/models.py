@@ -1,15 +1,9 @@
 from django.db import models
-from django.contrib.auth.models import User
 from datetime import date
 from django.forms import ValidationError
-
-"""
-TO DO: 
-- Validações: utils>profile>validators.py | utils>address>validators.py
-- Implementar validação de CPF no método clean() da classe Profile.
-- Implementar validação de CEP no método clean() da classe Address.
-- Implementar outras validações conforme necessário.
-"""
+from django.contrib.auth.models import User
+from utils.validator.cpf import validate_cpf
+from utils.validator.cep import validate_cep
 
 class Profile(models.Model):
     class Meta:
@@ -19,7 +13,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Usuário")
     birth_date = models.DateField(null=True, blank=True, verbose_name="Data de Nascimento")
     bio = models.TextField(null=True, blank=True, verbose_name="Biografia")
-    cpf = models.CharField(max_length=14, unique=True, null=True, blank=True, verbose_name="CPF")
+    cpf = models.CharField(max_length=11, unique=True, null=True, blank=True, verbose_name="CPF")
 
     # Propriedade para calcular a idade com base na data de nascimento
     @property
@@ -28,6 +22,18 @@ class Profile(models.Model):
             today = date.today()
             return today.year - self.birth_date.year - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
         return None
+    
+    def clean(self):
+        error_messages = {}
+
+        if self.birth_date and self.birth_date > date.today():
+            error_messages['birth_date'] = "A data de nascimento não pode ser no futuro."
+
+        if self.cpf and not validate_cpf(self.cpf):
+            error_messages['cpf'] = "CPF inválido."
+
+        if error_messages:
+            raise ValidationError(error_messages)
 
     def __str__(self):
         return f"Perfil de {self.user.get_full_name() or self.user.username}"
@@ -76,11 +82,20 @@ class Address(models.Model):
         ],
         verbose_name="Estado"   
     )
-    zip_code = models.CharField(max_length=9, verbose_name="CEP")
+    zip_code = models.CharField(max_length=8, verbose_name="CEP")
     country = models.CharField(
         max_length=2, default="BR", 
         choices=[("BR", "Brasil")], 
         verbose_name="País")
+    
+    def clean(self):
+        error_messages = {}
+
+        if self.zip_code and not validate_cep(self.zip_code):
+            error_messages['zip_code'] = "CEP inválido."
+
+        if error_messages:
+            raise ValidationError(error_messages)
 
     def __str__(self):
-        return f"{self.street}, {self.number} - {self.user.username}"
+        return f"{self.street}, {self.number} - {self.profile.user.username}"
