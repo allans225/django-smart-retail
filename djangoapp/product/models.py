@@ -1,7 +1,8 @@
 from django.db import models
 
-from django.utils.text import slugify
-from utils.resizing.images import resize_image
+from utils.images import process_image_for_webp
+from utils.slug import generate_unique_slug
+from utils.files import get_file_path
 
 class Product(models.Model):
     class Meta:
@@ -12,17 +13,21 @@ class Product(models.Model):
     short_description = models.TextField(max_length=255, verbose_name="Descrição Curta")
     long_description = models.TextField(verbose_name="Descrição Longa")
     cover_image = models.ImageField(
-        upload_to='products/%Y/%m/%d/',
+        upload_to=get_file_path,
+        max_length=255,
         blank=True, null=True, 
         verbose_name="Imagem de Capa")
-    slug = models.SlugField(unique=True, blank=True, null=True)
+    slug = models.SlugField(
+        max_length=255,
+        unique=True, blank=True
+    )
     marketing_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Preço Marketing")
     promotional_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Preço Promocional")
     type = models.CharField(
         default='V',
         max_length=1,
         choices=[
-            ('V', 'Variação'),
+            ('V', 'Variável'),
             ('S', 'Simples'),
         ],
         verbose_name="Tipo"
@@ -35,13 +40,19 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            # Gera um slug único antes de salvar
+            self.slug = generate_unique_slug(self)
 
         super().save(*args, **kwargs)
 
         if self.cover_image:
-            # max_image_size = 800
-            resize_image(self.cover_image) # padrão de 800px
+            # Processa a imagem para WebP e redimensiona
+            new_path = process_image_for_webp(self.cover_image)
+
+            if new_path:
+                # Atualiza o campo da imagem com o novo caminho WebP
+                self.__class__.objects.filter(id=self.id).update(cover_image=new_path)
+                self.cover_image.name = new_path
 
 class Variation(models.Model):
     class Meta:

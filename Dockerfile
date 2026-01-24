@@ -30,6 +30,8 @@ RUN apk add --no-cache \
     postgresql-client \
     jpeg-dev \
     zlib-dev \
+    libwebp-dev \
+    libwebp \
     libjpeg \
     gcc \
     python3-dev \
