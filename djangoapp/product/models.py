@@ -49,13 +49,10 @@ class Product(models.Model):
         ],
         verbose_name="Tipo"
     )
-    category = models.ForeignKey(
-        Category,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+    categories = models.ManyToManyField(
+        Category, 
         related_name='products',
-        verbose_name="Categoria"
+        verbose_name="Categorias"
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -12,6 +12,8 @@ class VariationInline(admin.TabularInline):
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'marketing_price', 'promotional_price', 'type', 'created_at', 'updated_at')
     prepopulated_fields = {'slug': ('name',)}
+    filter_horizontal = ('categories',)
+    list_filter = ('categories',)
     inlines = [
         VariationInline
     ]
