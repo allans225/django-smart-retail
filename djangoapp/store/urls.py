@@ -6,8 +6,6 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('produtos/', include('product.urls')),
-    path('pedidos/', include('order.urls')),
-    path('perfil/', include('account.urls')),
 ]
 
 # use 127.0.0.1:8000 to access the server from host machine
