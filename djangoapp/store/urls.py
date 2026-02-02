@@ -1,3 +1,4 @@
+import os
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -10,4 +11,5 @@ urlpatterns = [
 
 # use 127.0.0.1:8000 to access the server from host machine
 if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'static'))
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

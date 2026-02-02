@@ -1,4 +1,4 @@
-/djangoapp/static/
+# Ignore media files and local settings
 /djangoapp/media/
 /djangoapp/project/local_settings.py
 gunicorn-error-log
