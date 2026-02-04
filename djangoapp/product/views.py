@@ -1,15 +1,18 @@
-from django.shortcuts import render
 from django.views.generic.list import ListView
-from django.views import View
 from . import models
 
 class ProductListView(ListView):
     model = models.Product
-    template_name = 'product/list-all.html'
+    template_name = 'product/list.html'
     context_object_name = 'products'
 
-class CategoryList(View):
-    pass
+    def get_queryset(self):
+        queryset = models.Product.objects.all() # Fetch all products
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
 
-class DetailProduct(View):
-    pass
+class DetailProduct(ListView):
+    ...

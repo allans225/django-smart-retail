@@ -1,3 +1,32 @@
-<header>
-    <h1>Header</h1>
+{% load static %}
+<header class="main-header">
+    <nav class="nav-container">
+        <div class="nav-left">
+            <button class="menu-toggle" aria-label="Abrir menu">
+                <img src="{% static 'assets/img/icons/menu.svg' %}" alt="Menu Icon" class="menu-icon">
+            </button>
+            <a href="/" class="logo">
+                <img src="{% static 'assets/img/lualogo.png' %}" alt="Logo" class="logo-img">
+            </a>
+        </div>
+
+        <div class="search-container">
+            <form method="GET">
+                <input type="text" name="search" placeholder="Pesquisa" class="search-input">
+                <button type="submit" class="search-btn">
+                    <img src="{% static 'assets/img/icons/search.svg' %}" alt="Search Icon" class="search-icon">
+                </button>
+            </form>
+        </div>
+
+        <div class="nav-actions">
+            <a href="#" class="cart-icon">
+                <img src="{% static 'assets/img/icons/cart.svg' %}" alt="Cart Icon" class="cart-img">
+                <span class="badge">2</span>
+            </a>
+            <a href="#" class="user-icon">
+                <img src="{% static 'assets/img/icons/user.svg' %}" alt="User Icon" class="user-img">
+            </a>
+        </div>
+    </nav>
 </header>

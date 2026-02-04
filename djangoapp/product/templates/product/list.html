@@ -1,0 +1,12 @@
+{% extends 'static/base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="product-grid-container">
+    <div class="grid-wrapper">
+        {% for product in products %}
+            {% include 'product/partial/card-item.html' with product=product %}
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

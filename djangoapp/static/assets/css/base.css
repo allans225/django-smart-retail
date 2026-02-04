@@ -99,7 +99,7 @@
 
 /* Reset CSS */
 *, ::before, ::after { box-sizing: border-box; }
-html { line-sizing: normal; }
+html { line-height: normal; }
 body { margin: 0; }
 
 :root {
@@ -107,13 +107,14 @@ body { margin: 0; }
   --ft-menu: 'Arimo', sans-serif;
   --ft-mono: 'Montserrat', sans-serif;
 
+  --max-header-width: 1440px;
+
   --cl-ff-title: #272424;
   --cl-ff-text: #3d3d3d;
 
   --cl-overlay-bg: rgba(0, 0, 0, 0.5);
 
-  --cl-light-bg: #d7dfe1;
-  --cl-offwhite: #f8f8f0;
+  --cl-light-bg: #ebeaea;
   --cl-red: #ff3131;
   --cl-green: #00bf63;
   --cl-blue: #38b6ff;

@@ -1,1 +1,236 @@
 @import url('base.css');
+
+/* container centralizado para header e footer */
+.main-header, .main-footer {
+    max-width: var(--max-header-width);
+    margin: 0 auto;
+}
+
+/* header */
+.main-header {
+    font-family: var(--ft-menu);
+    background-color: white;
+    padding: 10px 20px;
+    border-radius: 15px; /* Efeito arredondado da imagem */
+    margin: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.nav-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* header left side */
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.logo {
+    font-family: var(--font-main);
+    font-weight: 600;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.logo img {
+    width: 55px;
+    height: 55px;
+}
+
+/* header search bar */
+.search-container {
+    flex-grow: 1;
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 40px;
+}
+
+.search-container form {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 45px 10px 20px;
+    border-radius: 25px;
+    border: none;
+    background-color: #e0e0e0;
+    font-family: var(--font-menu);
+    outline: none;
+}
+
+.search-btn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.search-icon {
+    width: 25px;
+    height: 25px;
+    filter: invert(50%) sepia(20%) saturate(500%) hue-rotate(180deg) brightness(90%) contrast(85%);
+}
+
+/* header action icons */
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.cart-icon {
+    position: relative;
+}
+
+.badge {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    background-color: var(--cl-red);
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 50%;
+    font-family: var(--font-main);
+}
+
+.user-icon img {
+    width: 28px;
+    height: 28px;
+}
+
+/* footer */
+
+.main-footer {
+    margin: 20px 10px; 
+    padding: 15px 0;
+}
+
+.footer-container {
+    background-color: white;
+    border-radius: 15px;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.copyright {
+    font-family: var(--ft-mono);
+    font-weight: 600;
+    color: var(--cl-ff-text);
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+
+/* product grid */
+
+.product-grid-container {
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.grid-wrapper {
+    display: grid;
+    /* Define colunas responsivas: mínimo 250px, máximo 1fr */
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 25px;
+    width: 100%;
+    max-width: 1200px; /* Impede que os itens estiquem demais em monitores 4K */
+}
+
+.product-card {
+    background-color: white;
+    border-radius: 5px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+}
+
+.product-image-placeholder {
+    background-color: #e0e0e0;
+    width: 100%;
+    aspect-ratio: 1 / 1; /* Mantém o card quadrado independente da imagem */
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.product-image-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Textos e Preços - card-item */
+.product-title {
+    font-family: var(--font-main);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--cl-ff-title);
+    margin-bottom: 8px;
+}
+
+.product-description {
+    font-family: var(--font-main);
+    font-weight: 400;
+    font-size: 0.85rem;
+    color: var(--cl-ff-text);
+    line-height: 1.4;
+    margin-bottom: 15px;
+}
+
+.product-price-row {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+}
+
+.price-current {
+    font-family: var(--font-main);
+    color: var(--cl-green);
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.price-old {
+    font-family: var(--font-main);
+    color: var(--cl-ff-text);
+    font-size: 0.9rem;
+    position: relative;
+    text-decoration: none;
+}
+
+.price-old::after {
+    content: "";
+    position: absolute;
+    left: -5px;
+    right: -5px;
+    top: 50%;
+    height: 2px;
+    background-color: var(--cl-green);
+}
