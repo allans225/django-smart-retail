@@ -1,20 +1,27 @@
+{% load product_filters %}
 <article class="product-card">
-    <div class="product-image-placeholder">
-        {% if product.cover_image %}
-            <img src="{{ product.cover_image.url }}" alt="{{ product.name }}">
-        {% endif %}
-    </div>
+    <a href="{{ product.get_absolute_url }}" class="product-link">
+        <div class="product-image-placeholder">
+            {% if product.cover_image %}
+                <img src="{{ product.cover_image.url }}" alt="{{ product.name }}">
+            {% endif %}
+        </div>
+    </a>
 
     <div class="product-info">
-        <h3 class="product-title">{{ product.name|truncatechars:35 }}</h3>
+        <a href="{{ product.get_absolute_url }}" class="product-link">
+            <h3 class="product-title">{{ product.name|truncatechars:55 }}</h3>
+        </a>
         <p class="product-description">
-            {{ product.short_description|truncatechars:70 }}
+            {{ product.short_description|truncatechars:100 }}
         </p>
 
         <div class="product-price-row">
-            <span class="price-current">R$ {{ product.marketing_price }}</span>
-            {% if product.old_price %}
-                <span class="price-old">R$ {{ product.promotional_price }}</span>
+            {% if product.promotional_price %}
+                <span class="price-current">{{ product.promotional_price|price_filter }}</span>
+                <span class="price-old">{{ product.marketing_price|price_filter }}</span>
+            {% else %}
+                <span class="price-current">{{ product.marketing_price|price_filter }}</span>
             {% endif %}
         </div>
     </div>

@@ -15,4 +15,6 @@ class ProductListView(ListView):
         return context
 
 class DetailProduct(ListView):
-    ...
+    model = models.Product
+    template_name = 'product/detail.html'
+    context_object_name = 'product'

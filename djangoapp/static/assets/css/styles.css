@@ -187,7 +187,7 @@
 /* Textos e Preços - card-item */
 .product-title {
     font-family: var(--font-main);
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: var(--cl-ff-title);
     margin-bottom: 8px;
@@ -220,7 +220,7 @@
 .price-old {
     font-family: var(--font-main);
     color: var(--cl-ff-text);
-    font-size: 0.9rem;
+    font-size: 1rem;
     position: relative;
     text-decoration: none;
 }
@@ -232,5 +232,16 @@
     right: -5px;
     top: 50%;
     height: 2px;
-    background-color: var(--cl-green);
+    background-color: black;
+}
+
+.product-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.product-card:hover .product-title {
+    transition: color 0.2s ease;
+    color: var(--cl-blue);
 }
