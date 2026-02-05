@@ -115,6 +115,7 @@ body { margin: 0; }
   --cl-overlay-bg: rgba(0, 0, 0, 0.5);
 
   --cl-light-bg: #ebeaea;
+  --cl-offwhite: #e0e0e0;
   --cl-red: #ff3131;
   --cl-green: #00bf63;
   --cl-blue: #38b6ff;

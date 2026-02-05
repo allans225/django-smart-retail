@@ -64,7 +64,7 @@
     padding: 10px 45px 10px 20px;
     border-radius: 25px;
     border: none;
-    background-color: #e0e0e0;
+    background-color: var(--cl-offwhite);
     font-family: var(--font-menu);
     outline: none;
 }
@@ -170,7 +170,7 @@
 }
 
 .product-image-placeholder {
-    background-color: #e0e0e0;
+    background-color: var(--cl-offwhite);
     width: 100%;
     aspect-ratio: 1 / 1; /* Mantém o card quadrado independente da imagem */
     border-radius: 5px;
@@ -244,4 +244,60 @@
 .product-card:hover .product-title {
     transition: color 0.2s ease;
     color: var(--cl-blue);
+}
+
+/* pagination */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+    width: 100%;
+}
+
+.pagination {
+    display: flex;
+    gap: 8px;
+    background-color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 50px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    max-width: fit-content;
+}
+
+.page-item {
+    display: flex;
+}
+
+.page-link {
+    font-family: var(--ft-menu);
+    font-size: 0.95rem;
+    color: var(--cl-ff-text);
+    padding: 8px 16px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+}
+
+/* pagination: Estado Ativo (Página atual) */
+.page-item.active .page-link {
+    background-color: var(--cl-blue);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* pagination: hover em páginas não ativas */
+.page-item:not(.active) .page-link:hover {
+    background-color: var(--cl-offwhite);
+    color: var(--cl-blue);
+}
+
+/* pagination: setas de navegação */
+.page-item:first-child .page-link,
+.page-item:last-child .page-link {
+    font-size: 1.2rem;
+    font-weight: bold;
 }
