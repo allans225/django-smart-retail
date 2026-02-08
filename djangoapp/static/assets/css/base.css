@@ -114,11 +114,14 @@ body { margin: 0; }
 
   --cl-overlay-bg: rgba(0, 0, 0, 0.5);
 
-  --cl-light-bg: #ebeaea;
-  --cl-offwhite: #e0e0e0;
-  --cl-red: #ff3131;
-  --cl-green: #00bf63;
-  --cl-blue: #38b6ff;
+  --cl-light-bg: hsl(0, 0%, 94%);
+  --cl-offwhite: hsl(0, 0%, 88%);
+
+  --cl-red: hsl(0, 100%, 60%);
+  --cl-green: hsl(151, 100%, 37%);
+  --cl-blue: hsl(202, 100%, 61%);
+
+  --cl-blue-light: hsla(202, 100%, 60%, 0.150);
 }
 
 body {

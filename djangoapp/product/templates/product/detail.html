@@ -1,4 +1,80 @@
-{% extends "static/base.html" %}
+{% extends 'static/base.html' %}
+{% load product_filters %}
+{% load static %}
+
 {% block content %}
-    
-{% endblock content %}
+<div class="detail-wrapper">
+    <main class="product-detail-grid">
+        <section class="block title-block">
+            <h1>{{ product.name }}</h1>
+        </section>
+
+        <section class="block short-desc-block">
+            <span class="label">Descrição</span>
+            <div class="content">
+                {{ product.short_description|linebreaks }}
+            </div>
+        </section>
+
+        <section class="block variations-block">
+            <span class="label">Variação: <strong>{{ product.get_main_variation.name }}</strong></span>
+            <div class="variation-list">
+                <img src="{{ product.cover_image.url }}" class="v-item active">
+                <img src="{{ product.cover_image.url}}" class="v-item">
+                <img src="{{ product.cover_image.url }}" class="v-item">
+            </div>
+        </section>
+
+        <section class="block stock-block">
+            <p>Estoque: <strong class="text-blue">Disponível</strong></p>
+            <p>Quantidade: <strong>{{ product.total_stock }} Un.</strong></p>
+        </section>
+
+        <section class="block gallery-main-block">
+            <div class="gallery-info-action-grid">
+
+                <div class="side-thumbnails-wrapper">
+                    <div class="side-thumbnails">
+                        <img src="{{ product.cover_image.url }}" class="t-item active">
+                        <img src="{{ product.cover_image.url }}" class="t-item">
+                        <img src="{{ product.cover_image.url }}" class="t-item">
+                        <img src="{{ product.cover_image.url }}" class="t-item">
+                    </div>
+                </div>
+
+                <div class="featured-wrapper">
+                    <div class="featured-image">
+                        <img src="{{ product.cover_image.url }}" alt="{{ product.name }}">
+                    </div>
+                </div>
+
+                <div class="prices-block">
+                    {% with main_var=product.get_main_variation %}
+                        {% if main_var %}
+                            {% if main_var.promotional_price > 0 and main_var.promotional_price < main_var.price %}
+                                <span class="price-current">{{ main_var.promotional_price|price_filter }}</span>
+                                <span class="price-old">{{ main_var.price|price_filter }}</span>
+                            {% else %}
+                                <span class="price-current">{{ main_var.price|price_filter }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="price-current">{{ product.marketing_price|price_filter }}</span>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+                    
+                <div class="action-block">
+                    <button class="btn-primary">Comprar Agora</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="block full-desc-block">
+            <span class="label">Descrição Técnica</span>
+            <div class="content">
+                {{ product.long_description|linebreaks }}
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}

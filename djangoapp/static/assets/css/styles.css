@@ -301,3 +301,144 @@
     font-size: 1.2rem;
     font-weight: bold;
 }
+
+/* Detail */
+.detail-wrapper {
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.product-detail-grid {
+    display: grid;
+    width: 100%;
+    max-width: 1200px;
+    gap: 5px;
+    grid-template-areas: 
+        "title          title          gallery"
+        "short-desc     short-desc     gallery"
+        "variations     stock          gallery"
+        "full-desc      full-desc      full-desc";
+    grid-template-columns: 1fr 1fr 1.3fr;
+}
+
+/* Estilo Base dos Blocos */
+.block {
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border-radius: 5px;
+    padding: 15px;
+}
+
+/* Definição das Áreas Principais */
+    .title-block { grid-area: title; display: flex; align-items: center; justify-content: center; }
+    .short-desc-block { grid-area: short-desc; }
+    .variations-block { grid-area: variations; display: flex; flex-direction: column; justify-content: center; text-align: center;}
+    .stock-block { grid-area: stock; display: flex; flex-direction: column; justify-content: center; text-align: center; }
+
+        /* Definição das áreas dentro de gallery-main-block */
+            .gallery-main-block { grid-area: gallery; display: flex; gap: 5px; }
+            .gallery-info-action-grid {
+                display: grid;
+                gap: 15px;
+                grid-template-areas: 
+                    "thumbnails featured"
+                    "buy-btn prices";
+                grid-template-columns: 1fr 1.5fr;
+            }
+            .side-thumbnails-wrapper { grid-area: thumbnails; display: flex; flex-direction: column; }
+            .featured-wrapper { grid-area: featured; display: flex; align-items: center; justify-content: center; }
+            .prices-block { grid-area: prices; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+            .action-block { grid-area: buy-btn;}
+        /* Fim - Definição das áreas dentro de gallery-main-block */
+
+    .full-desc-block { grid-area: full-desc; }
+/* fim - Definição das Áreas Principais */
+
+.title-block h1 {
+    color: var(--cl-ff-text);
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.variation-list {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.label {
+    font-size: 0.9rem;
+    color: var(--cl-ff-title);
+    font-weight: 300;
+}
+
+.v-item {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    padding: 5px;
+    object-fit: contain;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.v-item.active {
+    border-color: var(--cl-blue);
+}
+
+.stock-block p {
+    margin: 2px 0;
+    font-size: 1.2rem;
+    line-height: 1.2;
+}
+
+/* Detalhes Internos: Galeria */
+.side-thumbnails {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.t-item {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    padding: 5px;
+    object-fit: contain;
+    cursor: pointer;
+}
+
+.featured-image {
+    flex: 1;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.featured-image img { max-width: 100%; height: auto; }
+
+.prices-block { background-color: var(--cl-blue-light); border-radius: 5px; padding: 8px; }
+
+.btn-primary {
+    width: 100%;
+    height: 100%;
+    background-color: var(--cl-blue);
+    color: white;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    font-weight: 400;
+    transition: opacity 0.2s;
+}
+
+.btn-primary:hover { opacity: 0.9; }
+
+.old-price { text-decoration: line-through; color: var(--cl-green); font-size: 1.5rem; }
+.current-price { color: var(--cl-green); font-size: 2rem; font-weight: 700; }
+
+.text-blue { color: var(--cl-blue); }

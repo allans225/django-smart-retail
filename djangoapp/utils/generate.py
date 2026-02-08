@@ -1,8 +1,9 @@
-import string
+import re
 import random
+import string
 from django.utils.text import slugify
 
-def generate_unique_slug(instance, new_slug=None):
+def unique_slug(instance, new_slug=None):
     if new_slug is not None:
         slug = new_slug
     else:
@@ -16,6 +17,18 @@ def generate_unique_slug(instance, new_slug=None):
         ramdom_str = ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
         new_slug = f"{slug}-{ramdom_str}"
         # Recursividade para garantir que o slug é único
-        return generate_unique_slug(instance, new_slug=new_slug)
+        return unique_slug(instance, new_slug=new_slug)
     
     return slug
+
+
+def sku(product_name, variation_name=None):
+    # Limpa e formata o nome (ex: "Camiseta Azul" -> "CAMAZU")
+    clean_name = re.sub(r'[^A-Z0-9]', '', product_name.upper())
+    sku_base = clean_name[:6] # Pega os primeiros 6 caracteres
+    
+    if variation_name:
+        clean_var = re.sub(r'[^A-Z0-9]', '', variation_name.upper())
+        sku_base += f"-{clean_var[:3]}"
+        
+    return sku_base

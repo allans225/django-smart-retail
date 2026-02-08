@@ -1,28 +1,34 @@
 {% load product_filters %}
-<article class="product-card">
-    <a href="{{ product.get_absolute_url }}" class="product-link">
-        <div class="product-image-placeholder">
-            {% if product.cover_image %}
-                <img src="{{ product.cover_image.url }}" alt="{{ product.name }}">
-            {% endif %}
-        </div>
-    </a>
-
-    <div class="product-info">
+{% comment "Mesmo que o Product seja do tipo Simples é necessário" %}{% endcomment %}
+{% comment "no mínimo UMA variação para renderizar o card" %}{% endcomment %}
+{% if product.get_main_variation %}
+    <article class="product-card">
         <a href="{{ product.get_absolute_url }}" class="product-link">
-            <h3 class="product-title">{{ product.name|truncatechars:55 }}</h3>
+            <div class="product-image-placeholder">
+                {% if product.cover_image %}
+                    <img src="{{ product.cover_image.url }}" alt="{{ product.name }}">
+                {% endif %}
+            </div>
         </a>
-        <p class="product-description">
-            {{ product.short_description|truncatechars:100 }}
-        </p>
 
-        <div class="product-price-row">
-            {% if product.promotional_price %}
-                <span class="price-current">{{ product.promotional_price|price_filter }}</span>
-                <span class="price-old">{{ product.marketing_price|price_filter }}</span>
-            {% else %}
-                <span class="price-current">{{ product.marketing_price|price_filter }}</span>
-            {% endif %}
+        <div class="product-info">
+            <a href="{{ product.get_absolute_url }}" class="product-link">
+                <h3 class="product-title">{{ product.name|truncatechars:55 }}</h3>
+            </a>
+            <p class="product-description">
+                {{ product.short_description|truncatechars:100 }}
+            </p>
+
+            <div class="product-price-row">
+                {% with main_var=product.get_main_variation %}
+                    {% if main_var.promotional_price > 0 and main_var.promotional_price < main_var.price %}
+                        <span class="price-current">{{ main_var.promotional_price|price_filter }}</span>
+                        <span class="price-old">{{ main_var.price|price_filter }}</span>
+                    {% else %}
+                        <span class="price-current">{{ main_var.price|price_filter }}</span>
+                    {% endif %}
+                {% endwith %}
+            </div>
         </div>
-    </div>
-</article>
+    </article>
+{% endif %}

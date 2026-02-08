@@ -1,8 +1,9 @@
 from django.db import models
 from django.urls import reverse
 
+
+from utils import generate
 from utils.images import process_image_for_webp
-from utils.slug import generate_unique_slug
 from utils.files import get_file_path
 
 class Category(models.Model):
@@ -19,7 +20,7 @@ class Category(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = generate_unique_slug(self)
+            self.slug = generate.unique_slug(self)
         super().save(*args, **kwargs)
 
 class Product(models.Model):
@@ -39,10 +40,12 @@ class Product(models.Model):
         max_length=255,
         unique=True, blank=True
     )
-    marketing_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Preço Marketing")
-    promotional_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Preço Promocional")
+    """
+    Se possuir apenas uma variação é considerado "Simples". 
+    Se tiver múltiplas variações, é "Variável".
+    """
     type = models.CharField(
-        default='V',
+        default='S',
         max_length=1,
         choices=[
             ('V', 'Variável'),
@@ -58,17 +61,25 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @property
+    def get_main_variation(self):
+        """Retorna a variação principal (geralmente a mais barata)"""
+        return self.variations.order_by('price').first()
+    
+    @property
+    def total_stock(self):
+        return sum(v.stock for v in self.variations.all())
+
     def __str__(self):
         return self.name
-    
+
     def get_absolute_url(self):
         return reverse('product:detail', args=[self.slug])
     
-
     def save(self, *args, **kwargs):
         if not self.slug:
             # Gera um slug único antes de salvar
-            self.slug = generate_unique_slug(self)
+            self.slug = generate.unique_slug(self)
 
         super().save(*args, **kwargs)
 
@@ -91,8 +102,27 @@ class Variation(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Preço")
     promotional_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Preço Promocional")
     stock = models.PositiveIntegerField(default=1, verbose_name="Estoque")
+    sku = models.CharField(
+        max_length=50, 
+        unique=True,
+        blank=True,
+        null=True,
+        verbose_name="SKU (Código único)",
+        help_text="Deixe em branco para gerar automaticamente"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name or f"Variação de {self.product.name}"
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        if not self.sku:
+            base = generate.sku(self.product.name, self.name)
+            self.sku = f"{base}-{self.id}"
+            
+            # salvando novamente apenas o campo SKU para evitar loops
+            # update() para mais eficiência, evitando a chamada recursiva do save()
+            Variation.objects.filter(id=self.id).update(sku=self.sku)
