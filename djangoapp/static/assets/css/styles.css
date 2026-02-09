@@ -391,6 +391,11 @@
     border-color: var(--cl-blue);
 }
 
+.v-item:hover {
+    opacity: 0.8;
+    border-color: var(--cl-green);
+}
+
 .stock-block p {
     margin: 2px 0;
     font-size: 1.2rem;
@@ -404,6 +409,11 @@
     gap: 10px;
 }
 
+.side-thumbnails img:hover {
+    border: 2px solid var(--cl-green);
+    opacity: 0.8;
+}
+
 .t-item {
     width: 50px;
     height: 50px;
@@ -411,6 +421,10 @@
     padding: 5px;
     object-fit: contain;
     cursor: pointer;
+}
+
+.t-item.active {
+    border: 2px solid var(--cl-blue);
 }
 
 .featured-image {
@@ -442,3 +456,5 @@
 .current-price { color: var(--cl-green); font-size: 2rem; font-weight: 700; }
 
 .text-blue { color: var(--cl-blue); }
+
+.text-red { color: var(--cl-red); }

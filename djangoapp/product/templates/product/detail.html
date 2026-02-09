@@ -17,17 +17,23 @@
         </section>
 
         <section class="block variations-block">
-            <span class="label">Variação: <strong>{{ product.get_main_variation.name }}</strong></span>
+            <span class="label">Variação: <strong id="var-name-display">{{ product.get_main_variation.name }}</strong></span>
             <div class="variation-list">
-                <img src="{{ product.cover_image.url }}" class="v-item active">
-                <img src="{{ product.cover_image.url}}" class="v-item">
-                <img src="{{ product.cover_image.url }}" class="v-item">
+                {% for variation in product.variations.all %}
+                    <img src="{{ product.cover_image.url }}"
+                    class="v-item {% if forloop.first %}active{% endif %}"
+                    data-name="{{ variation.name|default:'Padrão' }}"
+                    data-price="{{ variation.price|price_filter }}"
+                    data-promo="{{ variation.promotional_price|price_filter }}"
+                    data-has-promo="{% if variation.promotional_price > 0 %}true{% else %}false{% endif %}"
+                    data-stock="{{ variation.stock }}">
+                {% endfor %}
             </div>
         </section>
 
         <section class="block stock-block">
-            <p>Estoque: <strong class="text-blue">Disponível</strong></p>
-            <p>Quantidade: <strong>{{ product.total_stock }} Un.</strong></p>
+            <p>Estoque: <strong class="text-blue" id="display-availability">Disponível</strong></p>
+            <p>Quantidade: <strong id="display-stock">{{ product.get_main_variation.stock }}</strong> <strong> Un.</strong></p>
         </section>
 
         <section class="block gallery-main-block">
@@ -48,17 +54,22 @@
                     </div>
                 </div>
 
-                <div class="prices-block">
+                <div class="prices-block" id="price-container">
                     {% with main_var=product.get_main_variation %}
                         {% if main_var %}
                             {% if main_var.promotional_price > 0 and main_var.promotional_price < main_var.price %}
-                                <span class="price-current">{{ main_var.promotional_price|price_filter }}</span>
-                                <span class="price-old">{{ main_var.price|price_filter }}</span>
+                                <span class="price-current" id="display-price-current">
+                                    {{ main_var.promotional_price|price_filter }}
+                                </span>
+                                <span class="price-old" id="display-price-old" style="display: inline-block;">
+                                    {{ main_var.price|price_filter }}
+                                </span>
                             {% else %}
-                                <span class="price-current">{{ main_var.price|price_filter }}</span>
+                                <span class="price-current" id="display-price-current">
+                                    {{ main_var.price|price_filter }}
+                                </span>
+                                <span class="price-old" id="display-price-old" style="display: none;"></span>
                             {% endif %}
-                        {% else %}
-                            <span class="price-current">{{ product.marketing_price|price_filter }}</span>
                         {% endif %}
                     {% endwith %}
                 </div>
@@ -77,4 +88,9 @@
         </section>
     </main>
 </div>
+
+{% block scripts %}
+    <script src="{% static 'assets/js/product_detail.js' %}?v=1.1"></script>
+{% endblock %}
+
 {% endblock %}

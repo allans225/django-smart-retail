@@ -1,5 +1,10 @@
+{% load static %}
 <footer class="main-footer">
     <div class="footer-container">
         <p class="copyright">© {% now "Y" %} Lua e-commerce</p>
     </div>
+
+    <script src="{% static 'assets/js/main.js' %}"></script>
+
+    {% block scripts %}{% endblock %}
 </footer>
