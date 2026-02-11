@@ -21,7 +21,12 @@ def unique_slug(instance, new_slug=None):
     
     return slug
 
-
+"""
+SKU: O SKU (Stock Keeping Unit) é um identificador único para cada produto ou variação de produto.
+Ele é usado para rastrear o estoque e facilitar a gestão de produtos.
+O SKU pode ser gerado a partir do nome do produto e, opcionalmente, do nome da variação,
+garantindo que seja único e fácil de identificar.
+"""
 def sku(product_name, variation_name=None):
     # Limpa e formata o nome (ex: "Camiseta Azul" -> "CAMAZU")
     clean_name = re.sub(r'[^A-Z0-9]', '', product_name.upper())

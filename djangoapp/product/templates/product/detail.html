@@ -19,15 +19,26 @@
         <section class="block variations-block">
             <span class="label">Variação: <strong id="var-name-display">{{ product.get_main_variation.name }}</strong></span>
             <div class="variation-list">
-                {% for variation in product.variations.all %}
-                    <img src="{{ product.cover_image.url }}"
-                    class="v-item {% if forloop.first %}active{% endif %}"
-                    data-name="{{ variation.name|default:'Padrão' }}"
-                    data-price="{{ variation.price|price_filter }}"
-                    data-promo="{{ variation.promotional_price|price_filter }}"
-                    data-has-promo="{% if variation.promotional_price > 0 %}true{% else %}false{% endif %}"
-                    data-stock="{{ variation.stock }}">
-                {% endfor %}
+                {# A Variação Principal (selecionada) é destacada como ativa, e suas imagens são usadas para a galeria #}
+                {% with main_var=product.get_main_variation %}
+                    {# Listamos todas as variações do produto para exibição, destacando a principal (selecionada) #}
+                    {% for variation in product.variations.all %}
+                        {# Para cada variação, exibimos a primeira imagem disponível ou a imagem de capa do produto como fallback #}
+                        {% with var_first_img=variation.images.first %}
+                            <img src="{% if var_first_img %}{{ var_first_img.image.url }}{% else %}{{ product.cover_image.url }}{% endif %}"
+                                {# TROCA: Comparamos o ID para definir quem começa ativo #}
+                                class="v-item {% if variation.id == main_var.id %}active{% endif %}"
+                                {# Dados personalizados para facilitar a troca de variações via JS #}
+                                data-images="{% for img in variation.images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                                data-name="{{ variation.name|default:'Padrão' }}"
+                                data-price="{{ variation.price|price_filter }}"
+                                data-promo="{{ variation.promotional_price|price_filter }}"
+                                data-has-promo="{% if variation.promotional_price > 0 %}true{% else %}false{% endif %}"
+                                data-stock="{{ variation.stock }}">
+                        {% endwith %}
+                    {% endfor %}
+                {% endwith %}
+
             </div>
         </section>
 
@@ -36,15 +47,20 @@
             <p>Quantidade: <strong id="display-stock">{{ product.get_main_variation.stock }}</strong> <strong> Un.</strong></p>
         </section>
 
-        <section class="block gallery-main-block">
+        <section class="block gallery-main-block" data-cover="{{ product.cover_image.url }}">
             <div class="gallery-info-action-grid">
 
                 <div class="side-thumbnails-wrapper">
                     <div class="side-thumbnails">
-                        <img src="{{ product.cover_image.url }}" class="t-item active">
-                        <img src="{{ product.cover_image.url }}" class="t-item">
-                        <img src="{{ product.cover_image.url }}" class="t-item">
-                        <img src="{{ product.cover_image.url }}" class="t-item">
+                        {# A Capa do Produto deve ser sempre a primeira #}
+                        <img src="{{ product.cover_image.url }}" class="t-item active" onclick="changeFeatured(this)">
+
+                        {# Em seguida, a variação principal (selecionada) mostra suas imagens #}
+                        {% with main_var=product.get_main_variation %}
+                            {% for var_img in main_var.images.all %}
+                                <img src="{{ var_img.image.url }}" class="t-item" onclick="changeFeatured(this)">
+                            {% endfor %}
+                        {% endwith %}
                     </div>
                 </div>
 
@@ -55,8 +71,10 @@
                 </div>
 
                 <div class="prices-block" id="price-container">
+                    {# Exibe o preço da variação principal (selecionada) #}
                     {% with main_var=product.get_main_variation %}
                         {% if main_var %}
+                            {# Lógica para exibir preço promocional se disponível e válido, caso contrário, exibe o preço normal #}
                             {% if main_var.promotional_price > 0 and main_var.promotional_price < main_var.price %}
                                 <span class="price-current" id="display-price-current">
                                     {{ main_var.promotional_price|price_filter }}

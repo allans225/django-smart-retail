@@ -1,10 +1,20 @@
 from django.contrib import admin
-from .models import Product, Variation, Category
+from .models import Product, Variation, Category, VariationImage
 from utils.filters import price_filter
 
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug')
     prepopulated_fields = {'slug': ('name',)}
+
+class VariationImageInline(admin.TabularInline):
+    model = VariationImage
+    extra = 1
+    max_num = 4 # Limita a no máximo 4 imagens por variação
+
+class VariationAdmin(admin.ModelAdmin):
+    list_display = ['product', 'name', 'price', 'promotional_price', 'stock']
+    search_fields = ['name', 'sku']
+    inlines = [VariationImageInline]
 
 class VariationInline(admin.StackedInline):
     model = Variation
@@ -52,3 +62,4 @@ class ProductAdmin(admin.ModelAdmin):
 
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Product, ProductAdmin)
+admin.site.register(Variation, VariationAdmin)

@@ -126,3 +126,32 @@ class Variation(models.Model):
             # salvando novamente apenas o campo SKU para evitar loops
             # update() para mais eficiência, evitando a chamada recursiva do save()
             Variation.objects.filter(id=self.id).update(sku=self.sku)
+
+class VariationImage(models.Model):
+    class Meta:
+        ordering = ['order']
+        verbose_name = "Imagem da Variação"
+        verbose_name_plural = "Imagens das Variações"
+
+    variation = models.ForeignKey(
+        Variation, on_delete=models.CASCADE, 
+        related_name='images', verbose_name="Variação"
+    )
+    image = models.ImageField(
+        upload_to=get_file_path, 
+        max_length=255, verbose_name="Imagem"
+    )
+    order = models.PositiveIntegerField(default=0, verbose_name="Ordem de Exibição")
+
+    def __str__(self):
+        return f"Imagem da {self.variation.name or self.variation.product.name}"
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        if self.image:
+            new_path = process_image_for_webp(self.image)
+
+            if new_path:
+                self.__class__.objects.filter(id=self.id).update(image=new_path)
+                self.image.name = new_path

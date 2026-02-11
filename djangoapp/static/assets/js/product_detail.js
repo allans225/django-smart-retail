@@ -41,6 +41,50 @@ function selectVariation(element) {
         availabilityEl.innerText = 'Disponível';
         availabilityEl.classList.replace('text-red', 'text-blue');
     }
+
+    // pega a capa global e as imagens da variação
+    const productCover = document.querySelector('.gallery-main-block').getAttribute('data-cover');
+    const variationImagesData = element.getAttribute('data-images');
+    
+    // cria o array da galeria começando sempre pela capa
+    let fullGallery = [productCover];
+
+    if (variationImagesData) {
+        // Filtra para evitar strings vazias caso não haja imagens extras
+        const extras = variationImagesData.split(',').filter(url => url.trim() !== "");
+        fullGallery = fullGallery.concat(extras);
+    }
+
+    updateGalleryUI(fullGallery);
+}
+
+function updateGalleryUI(images) {
+    const featuredImg = document.querySelector('.featured-image img');
+    const thumbnailsContainer = document.querySelector('.side-thumbnails');
+
+    if (images.length > 0) {
+        // Atualiza a imagem principal para a capa (ou a primeira do array)
+        featuredImg.src = images[0];
+
+        // Limpa e reconstrói as miniaturas
+        thumbnailsContainer.innerHTML = '';
+        images.forEach((url, index) => {
+            const activeClass = index === 0 ? 'active' : '';
+            
+            const thumb = document.createElement('img');
+            thumb.src = url;
+            thumb.className = `t-item ${activeClass}`;
+            
+            // Evento para trocar a imagem principal ao clicar na miniatura
+            thumb.addEventListener('click', function() {
+                featuredImg.src = this.src;
+                document.querySelectorAll('.t-item').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
+
+            thumbnailsContainer.appendChild(thumb);
+        });
+    }
 }
 
 // atribuir o clique via JS quando a página carregar
