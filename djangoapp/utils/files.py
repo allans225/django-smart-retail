@@ -1,5 +1,6 @@
 import os
 import uuid
+from dataclasses import field
 from django.utils.timezone import now
 """
     Gera um caminho único e organizado para qualquer tipo de arquivo.
@@ -19,3 +20,7 @@ def get_file_path(instance, filename):
     date_path = now().strftime("%Y/%m/%d")
     
     return os.path.join(folder_name, date_path, new_filename)
+
+def delete_old_file(file):
+    if file and os.path.isfile(file.path):
+        os.remove(file.path)

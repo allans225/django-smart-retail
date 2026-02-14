@@ -83,15 +83,6 @@ class Product(models.Model):
 
         super().save(*args, **kwargs)
 
-        if self.cover_image:
-            # Processa a imagem para WebP e redimensiona
-            new_path = process_image_for_webp(self.cover_image)
-
-            if new_path:
-                # Atualiza o campo da imagem com o novo caminho WebP
-                self.__class__.objects.filter(id=self.id).update(cover_image=new_path)
-                self.cover_image.name = new_path
-
 class Variation(models.Model):
     class Meta:
         verbose_name = "Variação"
@@ -148,10 +139,3 @@ class VariationImage(models.Model):
     
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-
-        if self.image:
-            new_path = process_image_for_webp(self.image)
-
-            if new_path:
-                self.__class__.objects.filter(id=self.id).update(image=new_path)
-                self.image.name = new_path

@@ -356,9 +356,16 @@
 /* fim - Definição das Áreas Principais */
 
 .title-block h1 {
-    color: var(--cl-ff-text);
+    color: var(--cl-ff-title);
     font-size: 1.5rem;
     font-weight: 500;
+}
+
+.product-detail-grid .content {
+    color: var(--cl-ff-text);
+    font-weight: 300;
+    font-size: 0.95rem;
+    line-height: 1.5;
 }
 
 .variation-list {
@@ -373,7 +380,19 @@
 .label {
     font-size: 0.9rem;
     color: var(--cl-ff-title);
-    font-weight: 300;
+    font-weight: 400;
+}
+
+.short-desc-block .label {
+    font-size: 1.2rem;
+    color: var(--cl-ff-title);
+    font-weight: 400;
+}
+
+.full-desc-block .label {
+    font-size: 1.2rem;
+    color: var(--cl-ff-title);
+    font-weight: 400;
 }
 
 .v-item {
@@ -398,7 +417,7 @@
 
 .stock-block p {
     margin: 2px 0;
-    font-size: 1.2rem;
+    font-size: 1rem;
     line-height: 1.2;
 }
 
