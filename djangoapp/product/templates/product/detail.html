@@ -29,6 +29,7 @@
                                 {# TROCA: Comparamos o ID para definir quem começa ativo #}
                                 class="v-item {% if variation.id == main_var.id %}active{% endif %}"
                                 {# Dados personalizados para facilitar a troca de variações via JS #}
+                                data-id="{{ variation.id }}"
                                 data-images="{% for img in variation.images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
                                 data-name="{{ variation.name|default:'Padrão' }}"
                                 data-price="{{ variation.price|price_filter }}"
@@ -43,8 +44,19 @@
         </section>
 
         <section class="block stock-block">
-            <p>Estoque: <strong class="text-blue" id="display-availability">Disponível</strong></p>
-            <p>Quantidade: <strong id="display-stock">{{ product.get_main_variation.stock }}</strong> <strong> Un.</strong></p>
+            <div class="stock-info">
+                <p>Estoque: <strong class="text-blue" id="display-availability">Disponível</strong></p>
+                <p>Quantidade: <strong id="display-stock">{{ product.get_main_variation.stock }}</strong> <strong> Un.</strong></p>
+            </div>
+
+            <div class="stock-act">
+                <p>Selecionar Quantidade:</p>
+                <div class="quantity-container">
+                    <button type="button" class="qty-btn minus" onclick="changeQty(-1)">-</button>
+                    <input type="number" id="product-qty" value="1" min="1" max="{{ product.get_main_variation.stock }}" readonly>
+                    <button type="button" class="qty-btn plus" onclick="changeQty(1)">+</button>
+                </div>
+            </div>
         </section>
 
         <section class="block gallery-main-block" data-cover="{{ product.cover_image.url }}">
@@ -91,9 +103,18 @@
                         {% endif %}
                     {% endwith %}
                 </div>
-                    
+                 
                 <div class="action-block">
-                    <button class="btn-primary">Comprar Agora</button>
+                    <button class="btn-primary"><span>Comprar Agora</span></button>
+                </div>
+
+                <div class="action-block">
+                    <input type="hidden" id="url-add-cart" value="{% url 'product:add_to_cart' %}">
+                    {% csrf_token %} 
+                    <button class="btn-secondary btn-add-to-cart">
+                        <img src="{% static 'assets/img/icons/add_shopping_cart.svg' %}" alt="Cart Add Icon" class="cart-img"> 
+                        <span>Adicionar ao Carrinho</span>
+                    </button>
                 </div>
             </div>
         </section>

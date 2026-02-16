@@ -1,0 +1,28 @@
+{% load static %}
+{% if messages %}
+<section class="messages-wrapper">
+    {% for message in messages %}
+    <div class="alert {{ message.tags }}" role="alert">
+        <span class="alert-icon">
+            {% if message.tags == 'alert-success' %}
+                <img src="{% static 'assets/img/icons/msg-suss.svg' %}" alt="Success Icon" class="success-img">
+
+            {% elif message.tags == 'alert-danger' %}
+                <img src="{% static 'assets/img/icons/msg-dang.svg' %}" alt="Danger Icon" class="danger-img"> 
+            
+            {% elif message.tags == 'alert-info' %}
+                <img src="{% static 'assets/img/icons/msg-info.svg' %}" alt="Info Icon" class="info-img"> 
+            
+            {% else %}
+                <img src="{% static 'assets/img/icons/msg-debu.svg' %}" alt="Debug Icon" class="debug-img"> 
+            
+            {% endif %}
+        </span>
+        <span class="alert-text">{{ message }}</span>
+        <button class="alert-close" onclick="this.parentElement.style.display='none';">
+            <img src="{% static 'assets/img/icons/close-msg-small.svg' %}" alt="Close Icon" class="debug-img"> 
+        </button>
+    </div>
+    {% endfor %}
+</section>
+{% endif %}

@@ -120,8 +120,12 @@ body { margin: 0; }
   --cl-red: hsl(0, 100%, 60%);
   --cl-green: hsl(151, 100%, 37%);
   --cl-blue: hsl(202, 100%, 61%);
-
   --cl-blue-light: hsla(202, 100%, 60%, 0.150);
+
+  --cl-info: hsl(60, 100%, 67%);
+  --cl-danger: hsl(5, 83%, 53%);
+  --cl-warning: hsl(33, 87%, 58%);
+  --cl-success: hsl(106, 96%, 64%);
 }
 
 body {
@@ -161,3 +165,107 @@ input, button, textarea, select { font: inherit; outline: none; }
 button { cursor: pointer; border: none; background: none; }
 ul, ol { list-style: none; margin: 0; padding: 0; }
 a { text-decoration: none; color: inherit; }
+
+/* Container de Mensagens */
+.messages-wrapper {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: fit-content;
+}
+
+.alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 12px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    
+    /* Adaptabilidade de texto */
+    min-width: 280px; 
+    max-width: 800px;
+    width: auto; 
+}
+
+.alert-text {
+    flex: 1;
+    white-space: normal;
+    word-wrap: break-word;
+    font-size: 14px;
+    line-height: 1.4;
+    color: white;
+}
+
+.alert.alert-success {
+    background-color: var(--cl-success);
+}
+
+.alert.alert-danger {
+    background-color: var(--cl-danger);
+}
+
+.alert.alert-info {
+    background-color: var(--cl-info);
+}
+
+.alert.alert-warning {
+    background-color: var(--cl-warning);
+}
+
+/* Estilização das Imagens (Ícones) */
+.alert-icon img, 
+.alert-close img {
+    width: 22px;
+    height: 22px;
+    display: block;
+}
+
+.alert-icon {
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.alert-text {
+    flex: 1;
+}
+
+/* Botão Fechar */
+.alert-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: 15px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.alert-close img {
+  color: white;
+}
+
+.alert-close:hover {
+    transform: scale(1.1);
+}
+
+/* Animação */
+@keyframes slideDown {
+    from { 
+        transform: translateY(-100%); /* Vem de cima para baixo */
+        opacity: 0; 
+    }
+    to { 
+        transform: translateY(0); /* Para na posição natural do flexbox */
+        opacity: 1; 
+    }
+}

@@ -152,7 +152,7 @@ MEDIA_ROOT = DATA_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MESSAGE_TAGS = {
-    constants.DEBUG: 'alert-info',
+    constants.DEBUG: 'alert-debug',
     constants.ERROR: 'alert-danger',
     constants.INFO: 'alert-info',
     constants.WARNING: 'alert-warning',

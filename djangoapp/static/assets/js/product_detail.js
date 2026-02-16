@@ -1,3 +1,20 @@
+function changeQty(steps) {
+    const qtyInput = document.getElementById('product-qty');
+    if (!qtyInput) return;
+
+    let currentVal = parseInt(qtyInput.value) || 1;
+    const maxStock = parseInt(qtyInput.getAttribute('max')) || 1;
+
+    let newVal = currentVal + steps;
+
+    if (newVal >= 1 && newVal <= maxStock) {
+        qtyInput.value = newVal;
+    } else if (newVal > maxStock) {
+        // Usa o seu showAlert que já está no escopo global/acessível
+        showAlert(`Apenas ${maxStock} unidades disponíveis em estoque.`, 'alert-info');
+    }
+}
+
 function selectVariation(element) {
     // Verifica se o elemento existe
     if (!element) {
@@ -14,7 +31,10 @@ function selectVariation(element) {
     const price = element.getAttribute('data-price');
     const promo = element.getAttribute('data-promo');
     const hasPromo = element.getAttribute('data-has-promo') === 'true';
-    const stock = parseInt(element.getAttribute('data-stock'));
+    // Sincroniza o estoque do seletor
+    const stock = parseInt(element.getAttribute('data-stock')) || 0;
+    const qtyInput = document.getElementById('product-qty');
+    const displayStock = document.getElementById('display-stock');
 
     // atualização dos textos na tela
     document.getElementById('var-name-display').innerText = name;
@@ -23,6 +43,18 @@ function selectVariation(element) {
     // capturando os elementos de preço
     const currentPriceEl = document.getElementById('display-price-current');
     const oldPriceEl = document.getElementById('display-price-old');
+
+    if (qtyInput) {
+        qtyInput.setAttribute('max', stock);
+        // Se a quantidade selecionada for maior que o novo estoque, reseta para o máximo
+        if (parseInt(qtyInput.value) > stock) {
+            qtyInput.value = stock > 0 ? 1 : 0;
+        }
+    }
+
+    if (displayStock) {
+        displayStock.innerText = stock;
+    }
 
     // Lógica de Preço
     if (hasPromo) {
@@ -58,6 +90,93 @@ function selectVariation(element) {
     updateGalleryUI(fullGallery);
 }
 
+const showAlert = (message, tags) => {
+    let wrapper = document.querySelector('.messages-wrapper');
+
+    if(!wrapper) {
+        wrapper = document.createElement('section');
+        wrapper.className = 'messages-wrapper';
+        document.body.appendChild(wrapper);
+    }
+
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert ${tags}`;
+    alertDiv.setAttribute('role', 'alert');
+
+    let iconName = 'msg-debu.svg';
+    if (tags === 'alert-success') iconName = 'msg-suss.svg';
+    else if (tags === 'alert-danger') iconName = 'msg-dang.svg';
+    else if (tags === 'alert-info') iconName = 'msg-info.svg';
+
+    alertDiv.innerHTML = `
+        <span class="alert-icon">
+            <img src="/static/assets/img/icons/${iconName}" alt="Icon">
+        </span>
+        <span class="alert-text">${message}</span>
+        <button class="alert-close" onclick="this.parentElement.remove();">
+            <img src="/static/assets/img/icons/close-msg-small.svg" alt="Close">
+        </button>
+    `;
+    wrapper.appendChild(alertDiv);
+
+    setTimeout(() => {
+        if (alertDiv.parentElement) alertDiv.remove();
+    }, 5000);
+}
+
+async function addToCart() {
+    const activeVariation = document.querySelector('.v-item.active');
+
+    if (!activeVariation) {
+        showAlert('Por favor, selecione uma variação.', 'alert-info');
+        return;
+    }
+
+    const variationId = activeVariation.getAttribute('data-id');
+
+    // DEBUG: Veja no console do navegador se isso aparece como 'null'
+    console.log("ID da Variação capturado:", variationId);
+    if (!variationId || variationId === "null") {
+        showAlert('Erro técnico: ID da variação não encontrado.', 'alert-danger');
+        return;
+    }
+
+    const quantity = document.getElementById('product-qty').value; 
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    const formData = new FormData();
+    formData.append('variation_id', variationId);
+    formData.append('quantity', quantity);
+    formData.append('csrfmiddlewaretoken', csrfToken);
+
+    // Captura a URL gerada pelo Django
+    const url = document.getElementById('url-add-cart').value;
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' } 
+        });
+
+        if (response.status === 404) {
+            showAlert('Erro: Rota não encontrada (404). Verifique as URLs.', 'alert-danger');
+            return;
+        }
+        
+        const data = await response.json();
+        showAlert(data.message, data.tags);
+
+        if (data.status === 'success') {
+            const cartCounter = document.querySelector('.cart-count');
+            if (cartCounter) cartCounter.innerText = data.cart_count;
+            console.log("Conteúdo atual no carrinho (total de itens): ", data.cart_count);
+        }
+    } catch (error) {
+        showAlert('Falha na comunicação com o servidor.', 'alert-danger');
+    }
+}
+
 function updateGalleryUI(images) {
     const featuredImg = document.querySelector('.featured-image img');
     const thumbnailsContainer = document.querySelector('.side-thumbnails');
@@ -87,21 +206,22 @@ function updateGalleryUI(images) {
     }
 }
 
-// atribuir o clique via JS quando a página carregar
 document.addEventListener('DOMContentLoaded', function() {
-    // Container pai das variações
+    // ouvintes de evento (Add to Cart)
+    const addToCartBtn = document.querySelector('.btn-add-to-cart');
+    if (addToCartBtn) {
+        addToCartBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            addToCart();
+        });
+    }
+    
+    // Delegação de clique para variações
     const variationList = document.querySelector('.variation-list');
-
     if (variationList) {
         variationList.addEventListener('click', function(e) {
-            console.log('Clique detectado na lista de variações. Verificando o alvo:', e.target);
-            // Verfica se o que foi clicado é realmente uma variação (v-item)
             const clickedItem = e.target.closest('.v-item');
-            
-            if (clickedItem) {
-                console.log('Variação clicada:', clickedItem.getAttribute('data-name'));
-                selectVariation(clickedItem);
-            }
+            if (clickedItem) selectVariation(clickedItem);
         });
     }
 });
