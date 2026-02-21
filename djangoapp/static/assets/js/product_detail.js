@@ -15,6 +15,17 @@ function changeQty(steps) {
     }
 }
 
+// Funçao auxiliar para as miniaturas funcionarem antes de qualquer troca de variação do produto
+function changeFeatured(element) {
+    const featuredImg = document.querySelector('.featured-image img');
+    if (featuredImg && element) {
+        featuredImg.src = element.src;
+        // Atualiza a classe active
+        document.querySelectorAll('.t-item').forEach(img => img.classList.remove('active'));
+        element.classList.add('active');
+    }
+}
+
 function selectVariation(element) {
     // Verifica se o elemento existe
     if (!element) {

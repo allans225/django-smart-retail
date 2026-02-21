@@ -1,0 +1,124 @@
+{% extends 'static/base.html' %}
+{% load product_filters %}
+{% load static %}
+
+{% block content %}
+<main class="cart-container">
+    {% if cart_items %}
+        <div class="cart-main-content">
+            <section class="block cart-filter">
+                <label class="filter-option">
+                    <input type="checkbox" checked>
+                    <span class="custom-checkbox active"></span>
+                    Todos os Produtos
+                </label>
+                <label class="filter-option">
+                    <input type="checkbox">
+                    <span class="custom-checkbox"></span>
+                    Com Desconto
+                </label>
+            </section>
+
+            <div class="cart-items-list">
+                {% for item in cart_items %}
+                <article class="block cart-item-card">
+                    <div class="item-img">
+                        <img src="{{ item.variation.product.cover_image.url }}" alt="{{ item.variation.product.name }}">
+                    </div>
+                    
+                    <div class="item-info">
+                        <h3>{{ item.variation.product.name }}</h3>
+                        <span class="variation-name">{{ item.variation.name }}</span>
+                        
+                        <div class="item-controls">
+                            <div class="quantity-container mini">
+                                <button type="button" class="qty-btn minus">-</button>
+                                <input type="number" id="product-qty" value="{{ item.quantity }}" readonly>
+                                <button type="button" class="qty-btn plus">+</button>
+                            </div>
+                            <span class="stock-info">+{{ item.variation.stock }} un. disponíveis</span>
+                        </div>
+                    </div>
+
+                    <div class="item-price-actions">
+                        <label class="item-select">
+                            <input type="checkbox" {% if item.selected %}checked{% endif %}>
+                            <span class="custom-checkbox"></span>
+                        </label>
+                        
+                        <div class="price-display">
+                            {% with var=item.variation %}
+                                {% if var.promotional_price > 0 and var.promotional_price < var.price %}
+                                    <span class="old-price">{{ var.price|price_filter }}</span>
+                                    <span class="current-price">{{ var.promotional_price|price_filter }}</span>
+                                {% else %}
+                                    <span class="current-price">{{ var.price|price_filter }}</span>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+
+                        <button class="remove-btn" title="Remover item" data-id="{{ item.variation.id }}">
+                            <img src="{% static 'assets/img/icons/trash.svg' %}" alt="Remover Produto">
+                        </button>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+
+        <aside class="cart-summary-sidebar">
+            <section class="block order-summary">
+                <h2>Resumo da Compra</h2>
+                
+                <div class="summary-details">
+                    <div class="summary-line">
+                        <span class="label">Quantidade de Produtos</span>
+                        <span>x{{ total_items }}</span>
+                    </div>
+                    <div class="summary-line">
+                        <span class="label">Subtotal</span>
+                        <span class="text-red">{{ cart_subtotal|price_filter }}</span>
+                    </div>
+
+                    <div class="summary-line">
+                        <span class="label">Desconto Porcentual</span>
+                        <span class="text-green">%{{total_discount_percent}}</span>
+                    </div>
+
+                    <div class="summary-line">
+                        <span class="label">Valor Descontado</span>
+                        <span class="text-green">{{ total_discount|price_filter }}</span>
+                    </div>
+                    
+                    <hr class="summary-divider">
+
+                    <div class="summary-line total">
+                        <span class="label">Total a Pagar</span>
+                        <span class="text-green">{{ grand_total|price_filter }}</span>
+                    </div>
+                </div>
+
+                <button class="btn-primary checkout-btn">Finalizar Pedido</button>
+            </section>
+
+            <div class="block continue-shopping">
+                <a href="{% url 'product:all' %}" class="block btn-continue">
+                    Continuar Comprando
+                </a>
+            </div>
+        </aside>
+    {% else %}
+        <div class="block middle continue-shopping">
+            <p>Seu carrinho está vazio.</p>
+            <a href="{% url 'product:all' %}" class="block btn-continue">
+                Continuar Comprando
+            </a>
+        </div>
+    {% endif %}
+</main>
+
+{% block scripts %}
+    <script src="{% static 'assets/js/cart.js' %}"></script>
+{%endblock  %}
+
+{% endblock %}

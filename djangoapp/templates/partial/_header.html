@@ -20,9 +20,9 @@
         </div>
 
         <div class="nav-actions">
-            <a href="#" class="cart-icon">
+            <a href="{% url 'product:cart_detail' %}" class="cart-icon">
                 <img src="{% static 'assets/img/icons/cart.svg' %}" alt="Cart Icon" class="cart-img">
-                <span class="badge">2</span>
+                <span class="badge"></span>
             </a>
             <a href="#" class="user-icon">
                 <img src="{% static 'assets/img/icons/user.svg' %}" alt="User Icon" class="user-img">

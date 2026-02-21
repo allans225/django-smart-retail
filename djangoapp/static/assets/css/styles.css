@@ -106,6 +106,7 @@
     padding: 2px 6px;
     border-radius: 50%;
     font-family: var(--font-main);
+    display: none; 
 }
 
 .user-icon img {
@@ -575,3 +576,197 @@
 .text-blue { color: var(--cl-blue); }
 
 .text-red { color: var(--cl-red); }
+
+/* Carrinho */
+.cart-container {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 20px;
+    max-width: var(--max-header-width);
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* Blocos de Filtro e Itens */
+.cart-filter {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 0.5rem;
+    padding: 15px 25px;
+}
+
+.filter-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-family: var(--ft-menu);
+}
+
+/* Card do Item Individual */
+.cart-item-card {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 0.5rem;
+    align-items: center;
+    position: relative;
+}
+
+.item-img {
+    width: 120px;
+    height: 120px;
+    background: var(--cl-light-bg);
+    border-radius: 15px;
+    padding: 10px;
+}
+
+.item-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.item-info { flex: 1; }
+.item-info h3 { font-size: 1.1rem; margin-bottom: 5px; }
+.variation-name { color: var(--cl-blue); font-size: 0.9rem; }
+
+.item-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.stock-info { font-size: 0.8rem; color: #888; margin-top: 1.2rem;}
+
+/* Preços e Ações no Card */
+.item-price-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
+    height: 100%;
+    min-width: 120px;
+}
+
+.price-display {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+}
+
+.price-display .old-price{
+    color: var(--cl-green);
+    font-size: 0.8rem;
+    font-weight: 300;
+}
+
+.price-display .current-price {
+    color: var(--cl-green);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.remove-btn {
+    background: var(--cl-red);
+    border-radius: 8px;
+    padding: 8px;
+    width: 35px;
+    height: 35px;
+    margin-top: 10px;
+}
+
+.remove-btn img { filter: brightness(0) invert(1); width: 100%; }
+
+/* Sidebar de Resumo */
+
+.order-summary {
+    margin-bottom: 0.5rem;
+}
+
+.order-summary h2 {
+    font-size: 1.2rem;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.summary-details {
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.summary-line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-family: var(--ft-menu);
+}
+.summary-line .label {
+    font-size: 0.95rem;
+    color: var(--cl-ff-text);
+    font-weight: 400;
+}
+
+.summary-divider {
+    border: 1px solid var(--cl-light-bg);
+}
+
+.summary-line.total{
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-top: 10px;
+}
+
+.summary-line.total .label {
+    font-size: 1.2rem;
+}
+
+.text-red { color: var(--cl-red); }
+.text-green { color: var(--cl-green); }
+
+.checkout-btn {
+    margin-top: 20px;
+    padding: 15px;
+}
+
+.btn-continue {
+    display: block;
+    text-align: center;
+    background: #000;
+    color: #fff;
+    font-weight: 600;
+    margin-top: 15px;
+    transition: opacity 0.2s;
+}
+
+.block.middle.continue-shopping{
+    max-width: 400px;
+    text-align: center;
+}
+
+/* Reutilização e customização do Checkbox */
+input[type="checkbox"] { display: none; }
+.custom-checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    display: inline-block;
+    position: relative;
+    background: var(--cl-offwhite);
+}
+
+input:checked + .custom-checkbox {
+    background: var(--cl-green);
+    border-color: var(--cl-green);
+}
+
+input:checked + .custom-checkbox::after {
+    content: '✓';
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+}

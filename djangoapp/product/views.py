@@ -78,33 +78,49 @@ class AddToCartView(View):
     
 class CartDetailView(View):
     def get(self, request, *args, **kwargs):
-        # Captura o carrinho da sessão ou um dicionário vazio
         cart_session = request.session.get('cart', {})
         cart_items = []
-        grand_total = 0
+        
+        cart_subtotal = 0  # Valor total SEM descontos
+        grand_total = 0    # Valor total COM descontos
+        total_items_count = sum(cart_session.values()) if cart_session else 0
 
-        # busca todas as variações de uma vez para evitar múltiplas consultas (otimização)
         variation_ids = cart_session.keys()
         variations = models.Variation.objects.filter(id__in=variation_ids).select_related('product')
 
         for variation in variations:
-            # recupera a quantidade salva na sessão para esta variação específica
-            quantity = cart_session.get(str(variation.id))
+            quantity = cart_session.get(str(variation.id), 0)
             
-            # Cálculo de preço (considerando promocional se existir)
-            unit_price = variation.promotional_price if variation.promotional_price > 0 else variation.price
-            subtotal = unit_price * quantity
-            grand_total += subtotal
+            # Preço subtotal (sem promoção)
+            price_raw = variation.price
+            item_subtotal_raw = price_raw * quantity
+            cart_subtotal += item_subtotal_raw
+
+            # Preço real cobrado (com ou sem promoção)
+            price_effective = variation.promotional_price if variation.promotional_price > 0 else variation.price
+            item_grand_total = price_effective * quantity
+            grand_total += item_grand_total
 
             cart_items.append({
                 'variation': variation,
                 'quantity': quantity,
-                'subtotal': subtotal,
+                'item_subtotal_raw': item_subtotal_raw,
+                'item_grand_total': item_grand_total,
             })
+
+        # Cálculo do desconto absoluto
+        total_discount = cart_subtotal - grand_total
+
+        # Cálculo do percentual (com "trava de segurança")
+        total_discount_percent = round((total_discount / cart_subtotal) * 100, 2) if cart_subtotal > 0 else 0
 
         context = {
             'cart_items': cart_items,
+            'total_items': total_items_count,
+            'cart_subtotal': cart_subtotal, 
             'grand_total': grand_total,
+            'total_discount': total_discount,
+            'total_discount_percent': total_discount_percent,
         }
 
-        return render(request, 'product/temp-cart.html', context)
+        return render(request, 'product/cart.html', context)
