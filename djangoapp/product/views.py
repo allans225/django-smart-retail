@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.contrib.messages import constants as django_messages
 from django.conf import settings
+from utils.helper import cart_calculations as cart_helper
 from . import models
 
 class ProductListView(ListView):
@@ -79,48 +80,33 @@ class AddToCartView(View):
 class CartDetailView(View):
     def get(self, request, *args, **kwargs):
         cart_session = request.session.get('cart', {})
-        cart_items = []
         
-        cart_subtotal = 0  # Valor total SEM descontos
-        grand_total = 0    # Valor total COM descontos
-        total_items_count = sum(cart_session.values()) if cart_session else 0
-
         variation_ids = cart_session.keys()
-        variations = models.Variation.objects.filter(id__in=variation_ids).select_related('product')
+        variations = models.Variation.objects.filter(
+            id__in=variation_ids
+        ).select_related('product')
 
+        cart_items = []
         for variation in variations:
-            quantity = cart_session.get(str(variation.id), 0)
+            # quantidade do item no carrinho
+            quantity = cart_helper.get_item_quant(cart_session, variation.id)
+
+            # preço efetivo (promoção ou cheio)
+            price_eff = variation.promotional_price if variation.promotional_price > 0 else variation.price
             
-            # Preço subtotal (sem promoção)
-            price_raw = variation.price
-            item_subtotal_raw = price_raw * quantity
-            cart_subtotal += item_subtotal_raw
-
-            # Preço real cobrado (com ou sem promoção)
-            price_effective = variation.promotional_price if variation.promotional_price > 0 else variation.price
-            item_grand_total = price_effective * quantity
-            grand_total += item_grand_total
-
             cart_items.append({
                 'variation': variation,
                 'quantity': quantity,
-                'item_subtotal_raw': item_subtotal_raw,
-                'item_grand_total': item_grand_total,
+                'item_subtotal_raw': variation.price * quantity,
+                'item_grand_total': price_eff * quantity,
             })
 
-        # Cálculo do desconto absoluto
-        total_discount = cart_subtotal - grand_total
-
-        # Cálculo do percentual (com "trava de segurança")
-        total_discount_percent = round((total_discount / cart_subtotal) * 100, 2) if cart_subtotal > 0 else 0
+        # totais GERAIS do carrinho
+        totals = cart_helper.get_cart_totals(cart_session, variations)
 
         context = {
             'cart_items': cart_items,
-            'total_items': total_items_count,
-            'cart_subtotal': cart_subtotal, 
-            'grand_total': grand_total,
-            'total_discount': total_discount,
-            'total_discount_percent': total_discount_percent,
+            **totals  
         }
 
         return render(request, 'product/cart.html', context)
