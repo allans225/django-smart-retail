@@ -20,6 +20,7 @@
             </section>
 
             <div class="cart-items-list">
+                {% csrf_token %}
                 {% for item in cart_items %}
                 <article class="block cart-item-card">
                     <div class="item-img">
@@ -73,28 +74,31 @@
                 <div class="summary-details">
                     <div class="summary-line">
                         <span class="label">Quantidade de Produtos</span>
-                        <span>x{{ total_items }}</span>
-                    </div>
-                    <div class="summary-line">
-                        <span class="label">Subtotal</span>
-                        <span class="text-red">{{ cart_subtotal|price_filter }}</span>
+                        <span id="total-qty">x{{ total_items_count }}</span>
                     </div>
 
-                    <div class="summary-line">
-                        <span class="label">Desconto Porcentual</span>
-                        <span class="text-green">%{{total_discount_percent}}</span>
-                    </div>
+                    {% if total_discount_percent > 0 %} 
+                        <div class="summary-line">
+                            <span class="label">Subtotal</span>
+                            <span id="subtotal-val" class="text-red">{{ cart_subtotal|price_filter }}</span>
+                        </div>
+                    
+                        <div class="summary-line">
+                            <span class="label">Desconto Porcentual</span>
+                            <span id="discount-percent-val" class="text-green">%{{total_discount_percent}}</span>
+                        </div>
 
-                    <div class="summary-line">
-                        <span class="label">Valor Descontado</span>
-                        <span class="text-green">{{ total_discount|price_filter }}</span>
-                    </div>
+                        <div class="summary-line">
+                            <span class="label">Valor Descontado</span>
+                            <span id="discount-abs-val" class="text-green">{{ total_discount|price_filter }}</span>
+                        </div>
+                    {% endif %}
                     
                     <hr class="summary-divider">
 
                     <div class="summary-line total">
                         <span class="label">Total a Pagar</span>
-                        <span class="text-green">{{ grand_total|price_filter }}</span>
+                        <span id="grand-total-val" class="text-green">{{ grand_total|price_filter }}</span>
                     </div>
                 </div>
 

@@ -106,7 +106,46 @@ class CartDetailView(View):
 
         context = {
             'cart_items': cart_items,
-            **totals  
+            **totals  # Desempacota o dicionário de totais para o contexto
         }
 
         return render(request, 'product/cart.html', context)
+
+class RemoveFromCartView(View):
+    def post(self, request, *args, **kwargs):
+        if request.headers.get('x-requested-with') != 'XMLHttpRequest':
+            return JsonResponse({'status': 'error', 'message': 'Acesso negado'}, status=400)
+        
+        variation_id = request.POST.get('variation_id')
+        
+        # se não houver ID ou se o ID for a string 'null'
+        if not variation_id or variation_id == 'null':
+            return JsonResponse({'status': 'error', 
+                                 'message': 'ID da variação inválido'
+                                 }, status=400)
+
+        cart_session = request.session.get('cart', {})
+        var_id_str = str(variation_id)
+
+        if var_id_str in cart_session:
+            # Remove o item
+            del cart_session[var_id_str]
+            request.session['cart'] = cart_session
+            request.session.modified = True
+
+            # Busca as variações que SOBRARAM para recalcular os totais
+            remaining_ids = cart_session.keys()
+            variations = models.Variation.objects.filter(id__in=remaining_ids)
+            
+            # Helper centralizado realiza os cálculos...
+            totals = cart_helper.get_cart_totals(cart_session, variations)
+
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Produto removido do carrinho',
+                **totals
+            })
+        
+        return JsonResponse({'status': 'error', 
+                             'message': 'Item não encontrado no carrinho'
+                             }, status=404)

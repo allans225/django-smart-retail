@@ -1,0 +1,33 @@
+const showAlert = (message, tags) => {
+    let wrapper = document.querySelector('.messages-wrapper');
+
+    if(!wrapper) {
+        wrapper = document.createElement('section');
+        wrapper.className = 'messages-wrapper';
+        document.body.appendChild(wrapper);
+    }
+
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert ${tags}`;
+    alertDiv.setAttribute('role', 'alert');
+
+    let iconName = 'msg-debu.svg';
+    if (tags === 'alert-success') iconName = 'msg-suss.svg';
+    else if (tags === 'alert-danger') iconName = 'msg-dang.svg';
+    else if (tags === 'alert-info') iconName = 'msg-info.svg';
+
+    alertDiv.innerHTML = `
+        <span class="alert-icon">
+            <img src="/static/assets/img/icons/${iconName}" alt="Icon">
+        </span>
+        <span class="alert-text">${message}</span>
+        <button class="alert-close" onclick="this.parentElement.remove();">
+            <img src="/static/assets/img/icons/close-msg-small.svg" alt="Close">
+        </button>
+    `;
+    wrapper.appendChild(alertDiv);
+
+    setTimeout(() => {
+        if (alertDiv.parentElement) alertDiv.remove();
+    }, 5000);
+}
