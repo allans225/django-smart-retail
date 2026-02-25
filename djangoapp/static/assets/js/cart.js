@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
     const cartList = document.querySelector('.cart-items-list');
-
     if (cartList) {
         cartList.addEventListener('click', async(e) => {
             // Permite clicar tanto no botão quanto na imagem dentro do botão
@@ -36,6 +35,7 @@ async function removeFromCart(variationId, button) {
             card.style.transform = 'translateX(20px)';
             card.style.transition = 'all 0.3s ease';
 
+            updateCartBadge(data.total_items_count);
             showAlert(data.message, 'alert-success');
 
             setTimeout(() => {

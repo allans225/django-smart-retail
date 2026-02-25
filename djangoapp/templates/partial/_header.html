@@ -22,7 +22,9 @@
         <div class="nav-actions">
             <a href="{% url 'product:cart_detail' %}" class="cart-icon">
                 <img src="{% static 'assets/img/icons/cart.svg' %}" alt="Cart Icon" class="cart-img">
-                <span class="badge"></span>
+                <span class="badge">
+                    {{ cart_total_items|default:"" }}
+                </span>
             </a>
             <a href="#" class="user-icon">
                 <img src="{% static 'assets/img/icons/user.svg' %}" alt="User Icon" class="user-img">

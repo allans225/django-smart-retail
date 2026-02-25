@@ -31,3 +31,19 @@ const showAlert = (message, tags) => {
         if (alertDiv.parentElement) alertDiv.remove();
     }, 5000);
 }
+
+// Função global para atualizar o contador do carrinho
+const updateCartBadge = (count) => {
+    const badge = document.querySelector('nav .badge');
+    if (!badge) return;
+
+    if (count > 0) {
+        badge.innerText = count;
+        badge.style.display = 'inline-block';
+        badge.classList.add('badge-pulse');
+        setTimeout(() => badge.classList.remove('badge-pulse'), 300);
+    } else {
+        badge.innerText = '';
+        badge.style.display = 'none';
+    }
+};

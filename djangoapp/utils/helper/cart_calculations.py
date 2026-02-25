@@ -1,3 +1,7 @@
+def get_cart_items_count(cart_session):
+    """Retorna a quantidade total de itens no carrinho."""
+    return sum(cart_session.values()) if cart_session else 0
+
 def get_item_quant(cart_session, variation_id):
     """Retorna a quantidade do item no carrinho como inteiro."""
     return int(cart_session.get(str(variation_id), 0))
@@ -26,10 +30,13 @@ def get_cart_totals(cart_session, variations):
     # Cálculo do percentual (com "trava de segurança")
     total_discount_percent = round((total_discount / cart_subtotal) * 100, 2) if cart_subtotal > 0 else 0
 
+    # Quantidade total de itens no carrinho
+    total_items_count = get_cart_items_count(cart_session)
+
     return {
         'cart_subtotal': cart_subtotal,
         'grand_total': grand_total,
         'total_discount': total_discount,
         'total_discount_percent': total_discount_percent,
-        'total_items_count': sum(cart_session.values()) if cart_session else 0
+        'total_items_count': total_items_count,
     }

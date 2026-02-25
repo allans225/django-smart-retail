@@ -111,13 +111,6 @@ async function addToCart() {
 
     const variationId = activeVariation.getAttribute('data-id');
 
-    // DEBUG: Veja no console do navegador se isso aparece como 'null'
-    console.log("ID da Variação capturado:", variationId);
-    if (!variationId || variationId === "null") {
-        showAlert('Erro técnico: ID da variação não encontrado.', 'alert-danger');
-        return;
-    }
-
     const quantity = document.getElementById('product-qty').value; 
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
@@ -145,9 +138,9 @@ async function addToCart() {
         showAlert(data.message, data.tags);
 
         if (data.status === 'success') {
-            const cartCounter = document.querySelector('.cart-count');
-            if (cartCounter) cartCounter.innerText = data.cart_count;
-            console.log("Conteúdo atual no carrinho (total de itens): ", data.cart_count);
+            const cartCounter = document.querySelector('nav .badge');
+            if (cartCounter) cartCounter.innerText = data.total_items_count;
+            console.log("Conteúdo atual no carrinho (total de itens): ", data.total_items_count);
         }
     } catch (error) {
         showAlert('Falha na comunicação com o servidor.', 'alert-danger');

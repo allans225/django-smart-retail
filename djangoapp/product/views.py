@@ -18,16 +18,47 @@ class ProductListView(ListView):
     def get_queryset(self):
         queryset = models.Product.objects.all() # Fetch all products
         return queryset
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
 
 class DetailProduct(DetailView):
     model = models.Product
     template_name = 'product/detail.html'
     context_object_name = 'product'
     slug_url_kwarg = 'slug'
+
+    
+class CartDetailView(View):
+    def get(self, request, *args, **kwargs):
+        cart_session = request.session.get('cart', {})
+        
+        variation_ids = cart_session.keys()
+        variations = models.Variation.objects.filter(
+            id__in=variation_ids
+        ).select_related('product')
+
+        cart_items = []
+        for variation in variations:
+            # quantidade do item no carrinho
+            quantity = cart_helper.get_item_quant(cart_session, variation.id)
+
+            # preço efetivo (promoção ou cheio)
+            price_eff = variation.promotional_price if variation.promotional_price > 0 else variation.price
+            
+            cart_items.append({
+                'variation': variation,
+                'quantity': quantity,
+                'item_subtotal_raw': variation.price * quantity,
+                'item_grand_total': price_eff * quantity,
+            })
+
+        # totais GERAIS do carrinho
+        totals = cart_helper.get_cart_totals(cart_session, variations)
+
+        context = {
+            'cart_items': cart_items,
+            **totals  # Desempacota o dicionário de totais para o contexto
+        }
+
+        return render(request, 'product/cart.html', context)
 
 class AddToCartView(View):
     def post(self, request, *args, **kwargs):
@@ -68,48 +99,14 @@ class AddToCartView(View):
         request.session.modified = True
 
         # soma o total de itens
-        total_items = sum(cart.values()) if cart else 0
+        total_items_count = cart_helper.get_cart_items_count(cart)
 
         return JsonResponse({
             'status': 'success',
             'message': f'Adicionado: {variation.product.name} ({variation.name})',
             'tags': settings.MESSAGE_TAGS.get(django_messages.SUCCESS, 'alert-success'),
-            'cart_count': total_items
+            'total_items_count': total_items_count,
         })
-    
-class CartDetailView(View):
-    def get(self, request, *args, **kwargs):
-        cart_session = request.session.get('cart', {})
-        
-        variation_ids = cart_session.keys()
-        variations = models.Variation.objects.filter(
-            id__in=variation_ids
-        ).select_related('product')
-
-        cart_items = []
-        for variation in variations:
-            # quantidade do item no carrinho
-            quantity = cart_helper.get_item_quant(cart_session, variation.id)
-
-            # preço efetivo (promoção ou cheio)
-            price_eff = variation.promotional_price if variation.promotional_price > 0 else variation.price
-            
-            cart_items.append({
-                'variation': variation,
-                'quantity': quantity,
-                'item_subtotal_raw': variation.price * quantity,
-                'item_grand_total': price_eff * quantity,
-            })
-
-        # totais GERAIS do carrinho
-        totals = cart_helper.get_cart_totals(cart_session, variations)
-
-        context = {
-            'cart_items': cart_items,
-            **totals  # Desempacota o dicionário de totais para o contexto
-        }
-
-        return render(request, 'product/cart.html', context)
 
 class RemoveFromCartView(View):
     def post(self, request, *args, **kwargs):
