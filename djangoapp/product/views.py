@@ -37,27 +37,29 @@ class CartDetailView(View):
 
         cart_items = []
         for variation in variations:
-            # quantidade do item no carrinho
-            quantity = cart_helper.get_item_quant(cart_session, variation.id)
+            vid_str = str(variation.id)
+            item_data = cart_session.get(vid_str, {})
 
-            # preço efetivo (promoção ou cheio)
-            price_eff = variation.promotional_price if variation.promotional_price > 0 else variation.price
+            # Garante que pegamos os dados do dicionário da sessão
+            quantity = item_data.get('qty', 0) if isinstance(item_data, dict) else item_data
+            is_selected = item_data.get('selected', True) if isinstance(item_data, dict) else True
+
+            price_eff = variation.get_price()
             
             cart_items.append({
                 'variation': variation,
                 'quantity': quantity,
+                'selected': is_selected,  # Adiciona o estado de seleção ao contexto do item
                 'item_subtotal_raw': variation.price * quantity,
                 'item_grand_total': price_eff * quantity,
             })
 
-        # totais GERAIS do carrinho
         totals = cart_helper.get_cart_totals(cart_session, variations)
 
         context = {
             'cart_items': cart_items,
-            **totals  # Desempacota o dicionário de totais para o contexto
+            **totals 
         }
-
         return render(request, 'product/cart.html', context)
 
 class AddToCartView(View):
@@ -91,9 +93,15 @@ class AddToCartView(View):
         vid_str = str(variation_id)
 
         if vid_str in cart:
-            cart[vid_str] = min(cart[vid_str] + quantity, variation.stock)
+            # Se for dicionário, atualiza qty
+            if isinstance(cart[vid_str], dict):
+                cart[vid_str]['qty'] = min(cart[vid_str]['qty'] + quantity, variation.stock)
+            else:
+                # Se for int (formato antigo), converte para dict
+                old_qty = cart[vid_str]
+                cart[vid_str] = {'qty': min(old_qty + quantity, variation.stock), 'selected': True}
         else:
-            cart[vid_str] = quantity
+            cart[vid_str] = {'qty': quantity, 'selected': True}
 
         request.session['cart'] = cart
         request.session.modified = True
@@ -146,3 +154,34 @@ class RemoveFromCartView(View):
         return JsonResponse({'status': 'error', 
                              'message': 'Item não encontrado no carrinho'
                              }, status=404)
+    
+class UpdateItemSelectionView(View):
+    def post(self, request, *args, **kwargs):
+        variation_id = request.POST.get('variation_id')
+        is_selected = request.POST.get('selected') == 'true' # Convertendo string para booleano
+
+        cart = request.session.get('cart', {})
+        vid_str = str(variation_id)
+
+        if vid_str in cart:
+            if isinstance(cart[vid_str], dict):
+                cart[vid_str]['selected'] = is_selected
+            else:
+                # Converte para dict se ainda for int
+                cart[vid_str] = {'qty': cart[vid_str], 'selected': is_selected}
+            
+            request.session.modified = True
+
+        # recálculo dos totais
+        # Buscamos as variações presentes no carrinho para o helper calcular
+        variations = models.Variation.objects.filter(id__in=cart.keys())
+        totals = cart_helper.get_cart_totals(cart, variations)
+
+        return JsonResponse({
+            'status': 'success',
+            'cart_subtotal': totals['cart_subtotal'],
+            'total_discount': totals['total_discount'],
+            'total_discount_percent': totals['total_discount_percent'],
+            'grand_total': totals['grand_total'],
+            'total_items_count': totals['total_items_count'],
+        })

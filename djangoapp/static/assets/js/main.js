@@ -37,8 +37,10 @@ const updateCartBadge = (count) => {
     const badge = document.querySelector('nav .badge');
     if (!badge) return;
 
-    if (count > 0) {
-        badge.innerText = count;
+    const total = parseInt(count) || 0; // Garantir que count seja um número inteiro
+
+    if (total > 0) {
+        badge.innerText = total;
         badge.style.display = 'inline-block';
         badge.classList.add('badge-pulse');
         setTimeout(() => badge.classList.remove('badge-pulse'), 300);

@@ -107,6 +107,11 @@ class Variation(models.Model):
     def __str__(self):
         return self.name or f"Variação de {self.product.name}"
     
+    def get_price(self):
+        if self.promotional_price and self.promotional_price < self.price:
+            return self.promotional_price
+        return self.price
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
