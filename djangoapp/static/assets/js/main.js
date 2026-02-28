@@ -1,4 +1,4 @@
-const showAlert = (message, tags) => {
+window.showAlert = (message, tags) => {
     let wrapper = document.querySelector('.messages-wrapper');
 
     if(!wrapper) {
@@ -33,8 +33,8 @@ const showAlert = (message, tags) => {
 }
 
 // Função global para atualizar o contador do carrinho
-const updateCartBadge = (count) => {
-    const badge = document.querySelector('nav .badge');
+window.updateCartBadge = (count) => {
+    const badge = document.getElementById('cart-badge');
     if (!badge) return;
 
     const total = parseInt(count) || 0; // Garantir que count seja um número inteiro
@@ -47,5 +47,23 @@ const updateCartBadge = (count) => {
     } else {
         badge.innerText = '';
         badge.style.display = 'none';
+    }
+};
+
+// Função global para mudar a quantidade do produto (chamada pelo onclick dos botões + e -)
+window.changeQty = (steps) =>{
+    const qtyInput = document.getElementById('product-qty');
+    if (!qtyInput) return;
+
+    let currentVal = parseInt(qtyInput.value) || 1;
+    const maxStock = parseInt(qtyInput.getAttribute('max')) || 1;
+
+    let newVal = currentVal + steps;
+
+    if (newVal >= 1 && newVal <= maxStock) {
+        qtyInput.value = newVal;
+    } else if (newVal > maxStock) {
+        // Usa o seu showAlert que já está no escopo global/acessível
+        showAlert(`Apenas ${maxStock} unidades disponíveis em estoque.`, 'alert-info');
     }
 };

@@ -22,8 +22,8 @@
         <div class="nav-actions">
             <a href="{% url 'product:cart_detail' %}" class="cart-icon">
                 <img src="{% static 'assets/img/icons/cart.svg' %}" alt="Cart Icon" class="cart-img">
-                <span class="badge" 
-                    style="display: {% if total_items_count and total_items_count > 0 %}flex{% else %}none{% endif %};">
+                <span id="cart-badge" class="badge" 
+                    style="display: {% if cart_total_items and cart_total_items > 0 %}flex{% else %}none{% endif %};">
                     {{ cart_total_items|default:"" }}
                 </span>
             </a>

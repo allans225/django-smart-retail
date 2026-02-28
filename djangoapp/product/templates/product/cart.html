@@ -79,17 +79,17 @@
 
                     <div class="summary-line" id="row-subtotal" style="display: {% if total_discount_percent > 0 %}flex{% else %}none{% endif %};">
                         <span class="label">Subtotal</span>
-                        <span id="subtotal-val" class="text-red">{{ cart_subtotal|price_filter }}</span>
+                        <span id="subtotal-val">{{ cart_subtotal|price_filter }}</span>
                     </div>
                 
                     <div class="summary-line" id="row-discount-percent" style="display: {% if total_discount_percent > 0 %}flex{% else %}none{% endif %};">
                         <span class="label">Desconto Porcentual</span>
-                        <span id="discount-percent-val" class="text-green">%{{total_discount_percent}}</span>
+                        <span id="discount-percent-val" class="text-green">{{total_discount_percent}}%</span>
                     </div>
 
                     <div class="summary-line" id="row-discount-abs" style="display: {% if total_discount > 0 %}flex{% else %}none{% endif %};">
                         <span class="label">Valor Descontado</span>
-                        <span id="discount-abs-val" class="text-green">{{ total_discount|price_filter }}</span>
+                        <span id="discount-abs-val" class="text-green">- {{ total_discount|price_filter }}</span>
                     </div>
                     
                     <hr class="summary-divider">
@@ -120,7 +120,7 @@
 </main>
 
 {% block scripts %}
-    <script src="{% static 'assets/js/cart.js' %}"></script>
+    <script type="module" src="{% static 'assets/js/pages/cart.js' %}"></script>
 {%endblock  %}
 
 {% endblock %}

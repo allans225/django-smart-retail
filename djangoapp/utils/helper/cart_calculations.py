@@ -17,6 +17,7 @@ def get_cart_totals(cart_session, variations_queryset):
     """
     # Criamos um dicionário para acesso rápido às variações, evitando loops aninhados
     variations_dict = {str(v.id): v for v in variations_queryset} # v.id => variation_id
+    total_items_count = 0
     cart_subtotal = 0
     grand_total = 0
 
@@ -25,16 +26,19 @@ def get_cart_totals(cart_session, variations_queryset):
         if not variation:
             continue  # Ignora itens que não correspondem a variações válidas
 
+        # Extração segura
         if isinstance(data, dict):
-            is_selected = data.get('selected', True)  # Assume selecionado por padrão
+            is_selected = data.get('selected', True) # Assume selecionado por padrão
             item_qty = data.get('qty', 0)
         else:
-            is_selected = True  # Assume selecionado por padrão
-            item_qty = 0
+            is_selected = True
+            item_qty = int(data) if str(data).isdigit() else 0
+
+        # Soma todos os itens da sessão para a badge, selecionados ou não
+        total_items_count += item_qty
 
         # Lógica central para calcular preços se o item estiver selecionado
-        if is_selected:
-            item_qty = data['qty']
+        if is_selected and item_qty > 0:
             price = float(variation.get_price()) # Preço com desconto aplicado, se houver
             base_price = float(variation.price)  # Preço cheio para cálculo de desconto
 

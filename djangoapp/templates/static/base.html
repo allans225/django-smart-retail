@@ -1,12 +1,18 @@
 <!doctype html>
+{% load static %}
 <html lang="pt-br">
     {% include 'partial/_head.html' %}
     <body>
         {% include 'partial/_header.html' %}
+        
         <main>
             {% include 'partial/_messages.html' %}
             {% block content %}{% endblock %}
         </main>
-    </body>
-    {% include 'partial/_footer.html' %}
+
+        {% include 'partial/_footer.html' %}
+
+        <script src="{% static 'assets/js/main.js' %}"></script>
+        {% block scripts %}{% endblock %}
+    </body> 
 </html>

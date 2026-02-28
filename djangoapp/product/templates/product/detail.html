@@ -39,7 +39,6 @@
                         {% endwith %}
                     {% endfor %}
                 {% endwith %}
-
             </div>
         </section>
 
@@ -129,7 +128,7 @@
 </div>
 
 {% block scripts %}
-    <script src="{% static 'assets/js/product_detail.js' %}?v=1.1"></script>
+    <script type="module" src="{% static 'assets/js/pages/product_detail.js' %}"></script>
 {% endblock %}
 
 {% endblock %}
