@@ -155,30 +155,71 @@ class RemoveFromCartView(View):
                              'message': 'Item não encontrado no carrinho'
                              }, status=404)
     
-class UpdateItemSelectionView(View):
+class UpdateItemSelectionCartView(View):
     def post(self, request, *args, **kwargs):
-        variation_id = request.POST.get('variation_id')
+        # 'scope' define se a ação é em um item ('single'), em todos ('all') ou promocionais ('discounted')
+        scope = request.POST.get('scope', 'single')
         is_selected = request.POST.get('selected') == 'true' # Convertendo string para booleano
+        variation_id = request.POST.get('variation_id')  # # 'variation_id' só é relevante quando o scope é 'single'
 
         cart = request.session.get('cart', {})
-        vid_str = str(variation_id)
 
-        if vid_str in cart:
-            if isinstance(cart[vid_str], dict):
-                cart[vid_str]['selected'] = is_selected
-            else:
-                # Converte para dict se ainda for int
-                cart[vid_str] = {'qty': cart[vid_str], 'selected': is_selected}
-            
-            request.session.modified = True
+        # Obtém as chaves IDs no carrinho e busca todas as variações correspondentes 
+        # em uma única consulta ao banco de dados (evita o problema de N+1 consultas).
+        variation_ids = cart.keys()
+        variations = models.Variation.objects.filter(id__in=variation_ids)
 
-        # recálculo dos totais
-        # Buscamos as variações presentes no carrinho para o helper calcular
-        variations = models.Variation.objects.filter(id__in=cart.keys())
+        # Selecionar/Desmarcar (tudo)
+        if scope == 'all':
+            for vid in cart:
+                # Verifica se o item é legado (apenas int) e converte para dict se necessário
+                if not isinstance(cart[vid], dict):
+                    cart[vid] = {'qty': cart[vid], 'selected': is_selected}
+                else:
+                    cart[vid]['selected'] = is_selected
+
+        # Selecionar/Desmarcar apenas itens com PROMOÇÃO
+        elif scope == 'discounted':
+            # Cria um conjunto de IDs que possuem desconto
+            discounted_ids = []
+            for v in variations:
+                if v.promotional_price > 0 and v.promotional_price < v.price:
+                    discounted_ids.append(str(v.id))
+
+            # percorre o carrinho para atualizar TODOS os itens
+            for vid in cart:
+                is_promo = vid in discounted_ids
+                
+                # Regra: Se o filtro é 'discounted' e está sendo ATIVADO (is_selected=True)
+                # Queremos que apenas os promos fiquem True, e os outros fiquem False.
+                if is_selected:
+                    new_state = True if is_promo else False
+                else:
+                    new_state = False if is_promo else cart[vid].get('selected', False)
+
+                if not isinstance(cart[vid], dict):
+                    cart[vid] = {'qty': cart[vid], 'selected': new_state}
+                else:
+                    cart[vid]['selected'] = new_state
+
+        # Selecionar/Desmarcar um ÚNICO item específico
+        elif scope == 'single' and variation_id:
+            vid_str = str(variation_id)
+            if vid_str in cart:
+                if not isinstance(cart[vid_str], dict):
+                    cart[vid_str] = {'qty': cart[vid_str], 'selected': is_selected}
+                else:
+                    cart[vid_str]['selected'] = is_selected
+
+        request.session['cart'] = cart
+        request.session.modified = True
+
+        # Recálculo dos totais
         totals = cart_helper.get_cart_totals(cart, variations)
 
         return JsonResponse({
             'status': 'success',
+            'selected_items_count': totals['selected_items_count'],
             'cart_subtotal': totals['cart_subtotal'],
             'total_discount': totals['total_discount'],
             'total_discount_percent': totals['total_discount_percent'],

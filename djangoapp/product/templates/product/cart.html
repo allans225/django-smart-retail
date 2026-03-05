@@ -8,14 +8,14 @@
         <div class="cart-main-content">
             <section class="block cart-filter">
                 <label class="filter-option">
-                    <input type="checkbox" checked>
+                    <input type="checkbox" id="filter-all" checked>
                     <span class="custom-checkbox active"></span>
                     Todos os Produtos
                 </label>
                 <label class="filter-option">
-                    <input type="checkbox">
+                    <input type="checkbox" id="filter-discount">
                     <span class="custom-checkbox"></span>
-                    Com Desconto
+                    Apenas Com Desconto
                 </label>
             </section>
 
@@ -43,7 +43,12 @@
 
                     <div class="item-price-actions">
                         <label class="item-select">
-                            <input type="checkbox" class="cart-item-check" data-id="{{ item.variation.id }}" {% if item.selected %}checked{% endif %}>
+                        <input 
+                            type="checkbox" 
+                            class="cart-item-check"
+                            data-id="{{ item.variation.id }}"
+                            data-has-discount="{% if item.variation.promotional_price > 0 %}true{% else %}false{% endif %}"
+                            {% if item.selected %}checked{% endif %}>
                             <span class="custom-checkbox"></span>
                         </label>
                         
@@ -72,9 +77,9 @@
                 <h2>Resumo da Compra</h2>
                 
                 <div class="summary-details">
-                    <div class="summary-line">
+                    <div class="summary-line" id="row-total-qty" style="display: {% if selected_items_count > 0 %}flex{% else %}none{% endif %};">
                         <span class="label">Quantidade de Produtos</span>
-                        <span id="total-qty">x{{ total_items_count }}</span>
+                        <span id="total-qty">x{{ selected_items_count }}</span>
                     </div>
 
                     <div class="summary-line" id="row-subtotal" style="display: {% if total_discount_percent > 0 %}flex{% else %}none{% endif %};">

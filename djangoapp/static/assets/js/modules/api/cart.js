@@ -17,14 +17,24 @@ export const CartAPI = {
     async remove(variationId, url) {
         const formData = getFormDataCart(variationId);
         return await getPostData(url, formData);
+    },
+
+    async updateBatchSelection(scope, isSelected, url) {
+        const formData = getFormDataCart(); // chamada com parâmetro no padrão nulo
+        formData.append('scope', scope);    // 'all' ou 'discounted'
+        formData.append('selected', isSelected ? 'true' : 'false');
+        return await getPostData(url, formData);
     }
 };
 
 // Função para coletar o token CSRF e criar um FormData básico para o cart
-function getFormDataCart(variationId) {
+function getFormDataCart(variationId=null) {
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     const formData = new FormData();
     formData.append('csrfmiddlewaretoken', csrftoken);
+
+    if (variationId == null) return formData;
+
     formData.append('variation_id', variationId);
     return formData;
 }

@@ -17,6 +17,7 @@ def get_cart_totals(cart_session, variations_queryset):
     """
     # Criamos um dicionário para acesso rápido às variações, evitando loops aninhados
     variations_dict = {str(v.id): v for v in variations_queryset} # v.id => variation_id
+    selected_items_count = 0
     total_items_count = 0
     cart_subtotal = 0
     grand_total = 0
@@ -44,6 +45,8 @@ def get_cart_totals(cart_session, variations_queryset):
 
             cart_subtotal += base_price * item_qty
             grand_total += price * item_qty
+            selected_items_count += item_qty
+            
 
     discount_value = cart_subtotal - grand_total
     discount_percent =round((discount_value / cart_subtotal) * 100, 2) if cart_subtotal > 0 else 0
@@ -51,7 +54,8 @@ def get_cart_totals(cart_session, variations_queryset):
     return {
         'cart_subtotal': cart_subtotal,
         'grand_total': grand_total,
+        'selected_items_count': selected_items_count,
         'total_discount': discount_value,   
         'total_discount_percent': discount_percent,
-        'total_items_count': get_cart_items_count(cart_session),
+        'total_items_count': total_items_count,
     }

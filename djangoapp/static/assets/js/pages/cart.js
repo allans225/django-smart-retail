@@ -1,8 +1,12 @@
 import { CartAPI } from '../modules/api/cart.js';
 
 const CartActions = {
+    // marcou ou desmarcou um item do carrinho
     async toggleSelection(variationId, isSelected) {
         const url = '/produtos/carrinho/update-selection/';
+
+        // Usuário marcou/desmarcou um item, então ele personalizou o carrinho. Logo desmarcamos os filtros globais, se ativos.
+        unmarkGlobalCartFilters();
 
         try {
             const data = await CartAPI.updateItemSelection(variationId, isSelected, url);
@@ -39,6 +43,39 @@ const CartActions = {
         } catch (error) {
             showAlert(error.message, error.tags);
         }
+    },
+
+    async handleFilterSelection(scope, isSelected) {
+        const url = '/produtos/carrinho/update-selection/';
+        toggleGlobalCartFilters(scope, isSelected);
+        try {
+            const data = await CartAPI.updateBatchSelection(scope, isSelected, url);
+            
+            if (data.status === 'success') {
+                // atualiza visualmente todos os checkboxes da lista
+                this.syncCheckboxesUI(scope, isSelected);
+                updateSummary(data);
+            }
+        } catch (error) {
+            showAlert(error.message, 'alert-danger');
+        }
+    },
+
+    syncCheckboxesUI(scope, isSelected) {
+        const checks = document.querySelectorAll('.cart-item-check');
+        checks.forEach(check => {
+            if (scope === 'all') {
+                check.checked = isSelected;
+            } else if (scope === 'discounted') {
+                // captura e verifica o data-attribute no HTML do item (data-has-discount="true")
+                if (check.dataset.hasDiscount === 'true') {
+                    check.checked = isSelected;
+                } else {
+                    // se filtrar por "com desconto", os sem desconto devem desmarcar
+                    if(isSelected) check.checked = false;
+                }
+            }
+        });
     }
 };
 
@@ -62,17 +99,30 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Seleção dos Filtros do carrinho por ID
+    const filterAll = document.getElementById('filter-all');
+    const filterDiscount = document.getElementById('filter-discount');
+
+    [filterAll, filterDiscount].forEach(filter => {
+        if (filter) {
+            filter.addEventListener('change', (e) => {
+                const scope = e.target.id === 'filter-all' ? 'all' : 'discounted';
+                CartActions.handleFilterSelection(scope, e.target.checked);
+            });
+        }
+    });
 });
 
 /**
- * Funções de UI (Resumo e Formatação)
+ * Funções de UI
  */
 function updateSummary(totals) {
     const qtyEl = document.getElementById('total-qty');
     const subtotalEl = document.getElementById('subtotal-val');
     const grandTotalEl = document.getElementById('grand-total-val');
 
-    if (qtyEl) qtyEl.innerText = `x${totals.total_items_count}`;
+    if (qtyEl) qtyEl.innerText = `x${totals.selected_items_count}`;
     if (subtotalEl) subtotalEl.innerText = formatMoney(totals.cart_subtotal);
     if (grandTotalEl) grandTotalEl.innerText = formatMoney(totals.grand_total);
 
@@ -88,8 +138,13 @@ function changeSummaryDataVisibility(totals) {
     const rowSubtotal = document.getElementById('row-subtotal');
     const rowPercent = document.getElementById('row-discount-percent');
     const rowAbs = document.getElementById('row-discount-abs');
+    const rowTotalQty = document.getElementById('row-total-qty');
 
+    const hasSelectedItems = totals.selected_items_count > 0;
     const hasDiscount = totals.total_discount_percent > 0;
+
+    if (hasSelectedItems)
+        rowTotalQty.style.display = hasSelectedItems ? 'flex' : 'none';
 
     if (rowPercent) {
         rowPercent.style.display = hasDiscount ? 'flex' : 'none';
@@ -104,6 +159,24 @@ function changeSummaryDataVisibility(totals) {
     // O rowSubtotal (preço riscado) só deve aparecer se houver desconto
     if (rowSubtotal) {
         rowSubtotal.style.display = hasDiscount ? 'flex' : 'none';
+    }
+}
+
+function unmarkGlobalCartFilters() {
+    const filterAll = document.getElementById('filter-all');
+    const filterDiscount = document.getElementById('filter-discount');
+    if (filterAll) filterAll.checked = false;
+    if (filterDiscount) filterDiscount.checked = false;
+}
+
+function toggleGlobalCartFilters(scope, isSelected) {
+    const filterAll = document.getElementById('filter-all');
+    const filterDiscount = document.getElementById('filter-discount');
+
+    if (scope === 'all' && isSelected) {
+        if (filterDiscount) filterDiscount.checked = false;
+    } else if (scope === 'discounted' && isSelected) {
+        if (filterAll) filterAll.checked = false;
     }
 }
 
