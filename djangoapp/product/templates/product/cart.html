@@ -23,19 +23,33 @@
                 {% csrf_token %}
                 {% for item in cart_items %}
                 <article class="block cart-item-card">
-                    <div class="item-img">
-                        <img src="{{ item.variation.product.cover_image.url }}" alt="{{ item.variation.product.name }}">
-                    </div>
+                    <a href="{{ item.variation.product.get_absolute_url }}" class="product-link">
+                        <div class="item-img">
+                            {% with var_first_img=item.variation.images.first %}
+                                <img 
+                                    src="{% if var_first_img %}{{ var_first_img.image.url }}{% else %}{{ item.variation.product.cover_image.url }}{% endif %}"
+                                    alt="{{ item.variation.product.name }}"
+                                >
+                            {% endwith %}
+                        </div>
+                    </a>
                     
                     <div class="item-info">
                         <h3>{{ item.variation.product.name }}</h3>
-                        <span class="variation-name">{{ item.variation.name }}</span>
+                        <a href="{{ item.variation.product.get_absolute_url }}" class="product-link">
+                            <span class="variation-name">{{ item.variation.name }}</span>
+                        </a>
                         
                         <div class="item-controls">
                             <div class="quantity-container mini">
-                                <button type="button" class="qty-btn minus">-</button>
-                                <input type="number" id="product-qty" value="{{ item.quantity }}" readonly>
-                                <button type="button" class="qty-btn plus">+</button>
+                                <button type="button" class="qty-btn minus" data-action="minus">-</button>
+                                <input type="number"
+                                        class="item-qty-input"
+                                        value="{{ item.quantity }}" 
+                                        max="{{ item.variation.stock }}" 
+                                        data-id="{{ item.variation.id }}" 
+                                        readonly>
+                                <button type="button" class="qty-btn plus" data-action="plus">+</button>
                             </div>
                             <span class="stock-info">+{{ item.variation.stock }} un. disponíveis</span>
                         </div>
@@ -114,15 +128,17 @@
                 </a>
             </div>
         </aside>
+</main>
     {% else %}
-        <div class="block middle continue-shopping">
-            <p>Seu carrinho está vazio.</p>
-            <a href="{% url 'product:all' %}" class="block btn-continue">
-                Continuar Comprando
-            </a>
+        <div class="center-container">
+            <div class="block continue-shopping">
+                <p>Seu carrinho está vazio.</p>
+                <a href="{% url 'product:all' %}" class="block btn-continue">
+                    Continuar Comprando
+                </a>
+            </div>
         </div>
     {% endif %}
-</main>
 
 {% block scripts %}
     <script type="module" src="{% static 'assets/js/pages/cart.js' %}"></script>

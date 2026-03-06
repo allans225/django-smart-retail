@@ -24,6 +24,12 @@ export const CartAPI = {
         formData.append('scope', scope);    // 'all' ou 'discounted'
         formData.append('selected', isSelected ? 'true' : 'false');
         return await getPostData(url, formData);
+    },
+
+    async updateQuantity(variationId, newVal, url) {
+        const formData = getFormDataCart(variationId);
+        formData.append('new_qty', newVal); // alinhado com request.POST.get('new_qty'), class UpdateItemQuantityCartView()
+        return await getPostData(url, formData);
     }
 };
 

@@ -52,7 +52,7 @@
                 <p>Selecionar Quantidade:</p>
                 <div class="quantity-container">
                     <button type="button" class="qty-btn minus" onclick="changeQty(-1)">-</button>
-                    <input type="number" id="product-qty" value="1" min="1" max="{{ product.get_main_variation.stock }}" readonly>
+                    <input type="number" class="item-qty-input" id="product-qty" value="1" min="1" max="{{ product.get_main_variation.stock }}" readonly>
                     <button type="button" class="qty-btn plus" onclick="changeQty(1)">+</button>
                 </div>
             </div>

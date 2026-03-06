@@ -226,3 +226,36 @@ class UpdateItemSelectionCartView(View):
             'grand_total': totals['grand_total'],
             'total_items_count': totals['total_items_count'],
         })
+
+class UpdateItemQuantityCartView(View):
+    def post(self, request):
+        variation_id = request.POST.get('variation_id')
+        try:
+            new_qty = int(request.POST.get('new_qty', 1))
+        except ValueError:
+            return JsonResponse({'status': 'error', 'message': 'Quantidade inválida'}, status=400)
+
+        # Validação de Estoque
+        variation = get_object_or_404(models.Variation, id=variation_id)
+        if new_qty > variation.stock:
+            return JsonResponse({
+                'status': 'error', 
+                'message': f'Estoque insuficiente ({variation.stock} disponíveis)'
+            }, status=400)
+
+        # Atualização da Sessão
+        cart = request.session.get('cart', {})
+        if variation_id in cart:
+            if isinstance(cart[variation_id], dict):
+                cart[variation_id]['qty'] = new_qty
+            else:
+                cart[variation_id] = {'qty': new_qty, 'selected': True}
+        
+        request.session['cart'] = cart
+        request.session.modified = True
+
+        # Recálculo (Helper)
+        variations = models.Variation.objects.filter(id__in=cart.keys())
+        totals = cart_helper.get_cart_totals(cart, variations)
+
+        return JsonResponse({'status': 'success', **totals})

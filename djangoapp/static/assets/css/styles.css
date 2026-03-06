@@ -473,7 +473,7 @@
     transform: scale(0.9);
 }
 
-#product-qty {
+.item-qty-input {
     width: 50px;
     text-align: center;
     border: none;
@@ -487,8 +487,8 @@
 }
 
 /* Remove setas no Chrome/Safari */
-#product-qty::-webkit-outer-spin-button,
-#product-qty::-webkit-inner-spin-button {
+.item-qty-input::-webkit-outer-spin-button,
+.item-qty-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
@@ -743,9 +743,24 @@
     transition: opacity 0.2s;
 }
 
-.block.middle.continue-shopping{
-    max-width: 400px;
+.center-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+    width: 100vw;
+    min-height: 60vh;
+    
     text-align: center;
+    margin: 0 auto;
+    
+    /* Previne que scroll horizontal apareça por causa do 100vw */
+    box-sizing: border-box; 
+}
+
+.continue-shopping {
+    max-width: 500px;
 }
 
 /* Reutilização e customização do Checkbox */

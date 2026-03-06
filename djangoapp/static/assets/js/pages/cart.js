@@ -76,30 +76,39 @@ const CartActions = {
                 }
             }
         });
+    },
+
+    async updateItemQuantity(input, steps) {
+        const currentVal = parseInt(input.value) || 1;
+        const maxStock = parseInt(input.max) || 1;
+        const variationId = input.dataset.id;
+        const newVal = currentVal + steps;
+
+        // Validação Visual
+        if (newVal < 1) return; // Não permite menos que 1
+        
+        if (newVal > maxStock) {
+            showAlert(`Apenas ${maxStock} unidades disponíveis em estoque.`, 'alert-info');
+            return;
+        }
+
+        // Chamada de API
+        const url = '/produtos/carrinho/update-quantity/';
+        try {
+            const data = await CartAPI.updateQuantity(variationId, newVal, url);
+            
+            if (data.status === 'success') {
+                input.value = newVal; // Atualiza o input na tela
+                updateSummary(data);  // Recalcula os totais
+            }
+        } catch (error) {
+            showAlert(error.message, 'alert-danger');
+        }
     }
 };
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
-    const cartList = document.querySelector('.cart-items-list');
-    
-    if (cartList) {
-        // Delegação para Checkbox
-        cartList.addEventListener('change', (e) => {
-            if (e.target.classList.contains('cart-item-check')) {
-                CartActions.toggleSelection(e.target.dataset.id, e.target.checked);
-            }
-        });
-
-        // Delegação para Botão Remover
-        cartList.addEventListener('click', (e) => {
-            const removeBtn = e.target.closest('.remove-btn');
-            if (removeBtn) {
-                CartActions.removeItem(removeBtn.dataset.id, removeBtn);
-            }
-        });
-    }
-
     // Seleção dos Filtros do carrinho por ID
     const filterAll = document.getElementById('filter-all');
     const filterDiscount = document.getElementById('filter-discount');
@@ -112,6 +121,33 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
+
+    const cartList = document.querySelector('.cart-items-list');
+    
+    if (cartList) {
+        cartList.addEventListener('click', (e) => {
+            const qtyBtn = e.target.closest('.qty-btn');
+            if (qtyBtn) {
+                const container = qtyBtn.closest('.quantity-container');
+                const input = container.querySelector('.item-qty-input');
+                const steps = qtyBtn.dataset.action === 'plus' ? 1: -1;
+                CartActions.updateItemQuantity(input, steps);
+                return; // Impede a continuação e execução do removeBtn
+            }
+            // Lógica do botão de remover item
+            const removeBtn = e.target.closest('.remove-btn');
+            if (removeBtn) {
+                CartActions.removeItem(removeBtn.dataset.id, removeBtn);
+            }
+        });
+    
+        // Escutando mudanças para Checkboxes
+        cartList.addEventListener('change', (e) => {
+            if (e.target.classList.contains('cart-item-check')) {
+                CartActions.toggleSelection(e.target.dataset.id, e.target.checked);
+            }
+        });
+    }
 });
 
 /**
