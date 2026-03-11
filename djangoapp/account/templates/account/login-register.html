@@ -1,0 +1,86 @@
+{% extends 'static/base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="auth-page">
+    <div class="auth-wrapper">
+        <section class="auth-card"> <!-- Login section -->
+            <div class="card-header">
+                <h2>Iniciar Sessão</h2>
+                <a href="#" class="toggle-link">Registrar-se <img src="{% static 'assets/img/icons/arrow-right-register.svg' %}" alt="Login"></a>
+            </div>
+            <hr class="divider">
+            <form id="login-form" method="POST">
+                {% csrf_token %}
+                <input class="auth-input" type="email" name="email" placeholder="E-main">
+                <input class="auth-input" type="password" name="password" placeholder="Senha">
+                
+                <div class="login-footer">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember">
+                        <span class="custom-check"></span>
+                        Lembrar-me
+                    </label>
+                </div>
+                
+                <button class="btn-auth-black" type="submit">Iniciar</button>
+            </form>
+        </section>
+
+        <section class="auth-card"> <!-- Register Section -->
+            <div class="card-header">
+                <h2>Registro</h2>
+                <a href="#" class="toggle-link">Entrar <img src="{% static 'assets/img/icons/arrow-right-register.svg' %}" alt="Login"></a>
+            </div>
+            <hr class="divider">
+            <form id="register-form" method="POST">
+                {% csrf_token %} 
+                <input type="text" name="first_name" placeholder="Nome" class="auth-input">
+                <input type="text" name="last_name" placeholder="Sobrenome" class="auth-input">
+                <div class="input-row">
+                    <input type="text" name="birth_date" placeholder="Data de Aniversário" class="auth-input">
+                    <input type="text" name="username" placeholder="Nome de Usuário" class="auth-input">
+                </div>
+                <input type="email" name="email" placeholder="E-mail" class="auth-input">
+                <input type="password" name="password" placeholder="Senha" class="auth-input">
+                <input type="password" name="confirm_password" placeholder="Confirmar Senha" class="auth-input">
+
+                <div class="expand-trigger">
+                    <button type="button" id="btn-address" class="btn-expand">
+                        Anexar um Endereço <img id="arrow-icon" src="{% static 'assets/img/icons/arrow-down-register.svg' %}" alt="Anexar Endereço">
+                    </button>
+                </div>
+
+                <div id="address-section" class="address-collapsible">
+                    <div class="input-row">
+                        <input type="text" name="zipcode" placeholder="CEP" class="auth-input">
+                        <input type="text" name="number" placeholder="Número" class="auth-input">
+                    </div>
+
+                    <input type="text" name="street" placeholder="Rua" class="auth-input">
+                    <input type="text" name="neighborhood" placeholder="Bairro" class="auth-input">
+                    <input type="text" name="city" placeholder="Cidade" class="auth-input">
+
+                    <div class="input-row">
+                        <select name="state" class="auth-input">
+                            <option disabled selected>Estado</option>
+                        </select>
+                        <select name="country" class="auth-input">
+                            <option disabled selected>País</option>
+                        </select>
+                    </div>
+
+                    <input type="text" name="complement" placeholder="Complemento" class="auth-input">
+                </div>
+
+                <button type="submit" class="btn-auth-black">Registrar</button>
+            </form>
+        </section>
+    </div>
+</main>
+
+{% block scripts %}
+    <script type="module" src="{% static 'assets/js/pages/profile_forms.js' %}"></script>
+{% endblock  %}
+
+{% endblock %}

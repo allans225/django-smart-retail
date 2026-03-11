@@ -788,3 +788,206 @@ input:checked + .custom-checkbox::after {
     transform: translate(-50%, -50%);
     font-size: 14px;
 }
+
+/* account: forms - login & register */
+
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.auth-card {
+    background: #ffffff;
+    padding: 30px 45px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.auth-input {
+    width: 100%;
+    background-color: #d9d9d9;
+    border: none;
+    padding: 12px 15px;
+    border-radius: 5px;
+    margin-bottom: 18px;
+    font-size: 1rem;
+    color: #333;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.login-footer {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+.remember-me {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #666;
+    user-select: none;
+    position: relative;
+}
+
+/* Esconde o checkbox padrão */
+.remember-me input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* checkbox customizado */
+.custom-check {
+    position: relative;
+    height: 18px;
+    width: 18px;
+    background-color: #d9d9d9;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.remember-me:hover input ~ .custom-check {
+    background-color: #ccc;
+}
+
+.remember-me input:checked ~ .custom-check {
+    background-color: #000;
+}
+
+.custom-check:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.remember-me input:checked ~ .custom-check:after {
+    display: block;
+}
+
+/* Ajuste na estrutura da footer para alinhar à direita */
+.login-footer {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.toggle-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--cl-blue);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: transform 0.3s;
+}
+
+.toggle-link img {
+    height: auto;
+    display: block;
+}
+
+.toggle-link:hover img {
+    transform: translateX(2px);
+}
+
+.divider { 
+  border: 0.5px solid #eee; 
+  margin-bottom: 30px; 
+}
+
+.input-row { display: flex; gap: 10px; }
+
+.input-row > * {
+    flex: 1 1 0%;
+    min-width: 0;
+}
+
+select.auth-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+}
+
+.expand-trigger {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+.btn-expand {
+    background: none;
+    border: none;
+    color: #f39c12;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.95rem;
+    margin: 10px 0 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-auth-black {
+    width: 100%;
+    background: #000000;
+    color: #ffffff;
+    border: none;
+    padding: 14px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: capitalize;
+    margin-top: 10px;
+}
+
+/* Controle de visibilidade dos Cards */
+.auth-card.hidden {
+    display: none;
+}
+
+/* Lógica de Expansão suave do Endereço */
+.address-collapsible {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.5s ease-in-out, opacity 0.3s ease;
+}
+
+.address-collapsible.open {
+    max-height: 1000px; /* Valor alto o suficiente para os campos */
+    opacity: 1;
+    margin-top: 10px;
+}
+
+/* Transição para o ícone da seta */
+#arrow-icon {
+    transition: transform 0.3s ease-in-out;
+}
