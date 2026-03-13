@@ -160,6 +160,7 @@ MESSAGE_TAGS = {
 }
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 1 semana em segundos
+SESSION_COOKIE_AGE_REMEMBER = 60 * 60 * 24 * 14  # 2 semana em segundos
 SESSION_SAVE_EVERY_REQUEST = False     # Não salvar a cada requisição
 
 # Use PickleSerializer to allow storing complex objects in session

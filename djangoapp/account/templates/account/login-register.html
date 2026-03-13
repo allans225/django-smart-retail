@@ -10,21 +10,21 @@
                 <a href="#" class="toggle-link">Registrar-se <img src="{% static 'assets/img/icons/arrow-right-register.svg' %}" alt="Login"></a>
             </div>
             <hr class="divider">
-            <form id="login-form" method="POST">
-                {% csrf_token %}
-                <input class="auth-input" type="email" name="email" placeholder="E-main">
-                <input class="auth-input" type="password" name="password" placeholder="Senha">
-                
-                <div class="login-footer">
-                    <label class="remember-me">
-                        <input type="checkbox" name="remember">
-                        <span class="custom-check"></span>
-                        Lembrar-me
-                    </label>
-                </div>
-                
-                <button class="btn-auth-black" type="submit">Iniciar</button>
-            </form>
+                <form id="login-form" method="POST" data-url="{% url 'account:login' %}">
+                    {% csrf_token %}
+                    <input class="auth-input" type="email" name="email" placeholder="E-mail">
+                    <input class="auth-input" type="password" name="password" placeholder="Senha">
+                    
+                    <div class="login-footer">
+                        <label class="remember-me">
+                            <input type="checkbox" name="remember">
+                            <span class="custom-check"></span>
+                            Lembrar-me
+                        </label>
+                    </div>
+                    
+                    <button class="btn-auth-black" type="submit">Iniciar</button>
+                </form>
         </section>
 
         <section class="auth-card"> <!-- Register Section -->
@@ -80,7 +80,7 @@
 </main>
 
 {% block scripts %}
-    <script type="module" src="{% static 'assets/js/pages/profile_forms.js' %}"></script>
+    <script type="module" src="{% static 'assets/js/pages/account/auth.js' %}"></script>
 {% endblock  %}
 
 {% endblock %}

@@ -1,4 +1,4 @@
-import { CartAPI } from '../modules/api/cart.js';
+import { CartAPI } from '../../modules/api/cart.js';
 
 const CartActions = {
     // marcou ou desmarcou um item do carrinho

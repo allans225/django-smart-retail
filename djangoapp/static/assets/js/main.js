@@ -1,3 +1,41 @@
+const messageTimeOut = (msg, value = 5000) => {
+    setTimeout(() => {
+        msg.style.opacity = '0';
+        setTimeout(() => {
+            if (msg.parentElement) msg.remove();
+        }, 500); // tempo para o fade-out terminar
+    }, value);
+}
+
+/* 
+ * Renderiza a mensagem que fica guardada na sessão do servidor 
+ * e aparece automaticamente assim que a nova página carregar.
+ * Resolve o problema: redirecionamento limpa o estado do JavaScript e carrega uma nova página, 
+ * qualquer alerta disparado via AJAX antes do redirecionamento sumiria instantaneamente.
+ */
+const processDjangoMessages = () => {
+    const messagesElement = document.getElementById('django-messages');
+    
+    if (messagesElement) {
+        try {
+            const messages = JSON.parse(messagesElement.textContent);
+            
+            messages.forEach(msg => {
+                if (window.showAlert) {
+                    window.showAlert(msg.message, msg.tags);
+                }
+            });
+            
+            // Remove o elemento após processar para evitar duplicidade
+            messagesElement.remove();
+        } catch (e) {
+            console.error("Erro ao processar mensagens do Django:", e);
+        }
+    }
+};
+// Inicia o processamento quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', processDjangoMessages);
+
 window.showAlert = (message, tags) => {
     let wrapper = document.querySelector('.messages-wrapper');
 
@@ -27,9 +65,7 @@ window.showAlert = (message, tags) => {
     `;
     wrapper.appendChild(alertDiv);
 
-    setTimeout(() => {
-        if (alertDiv.parentElement) alertDiv.remove();
-    }, 5000);
+    messageTimeOut(alertDiv);
 }
 
 // Função global para atualizar o contador do carrinho

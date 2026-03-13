@@ -1,4 +1,4 @@
-import { CartAPI } from '../modules/api/cart.js';
+import { CartAPI } from '../../modules/api/cart.js';
 
 /*
  * UI - Gerencia apenas a manipulação do DOM
