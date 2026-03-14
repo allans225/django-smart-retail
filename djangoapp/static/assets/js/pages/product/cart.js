@@ -1,17 +1,99 @@
 import { CartAPI } from '../../modules/api/cart.js';
 
+const CartUI = {
+    syncCheckboxesUI(scope, isSelected) {
+        const checks = document.querySelectorAll('.cart-item-check');
+        checks.forEach(check => {
+            if (scope === 'all') {
+                check.checked = isSelected;
+            } else if (scope === 'discounted') {
+                // captura e verifica o data-attribute no HTML do item (data-has-discount="true")
+                if (check.dataset.hasDiscount === 'true') {
+                    check.checked = isSelected;
+                } else {
+                    // se filtrar por "com desconto", os sem desconto devem desmarcar
+                    if(isSelected) check.checked = false;
+                }
+            }
+        });
+    },
+
+    updateSummary(totals) {
+        const qtyEl = document.getElementById('total-qty');
+        const subtotalEl = document.getElementById('subtotal-val');
+        const grandTotalEl = document.getElementById('grand-total-val');
+
+        if (qtyEl) qtyEl.innerText = `x${totals.selected_items_count}`;
+        if (subtotalEl) subtotalEl.innerText = formatMoney(totals.cart_subtotal);
+        if (grandTotalEl) grandTotalEl.innerText = formatMoney(totals.grand_total);
+
+        // Visibilidade dos descontos
+        changeSummaryDataVisibility(totals);
+
+        if (typeof updateCartBadge === 'function') {
+            updateCartBadge(totals.total_items_count);
+        }
+    },
+
+    changeSummaryDataVisibility(totals) {
+        const rowSubtotal = document.getElementById('row-subtotal');
+        const rowPercent = document.getElementById('row-discount-percent');
+        const rowAbs = document.getElementById('row-discount-abs');
+        const rowTotalQty = document.getElementById('row-total-qty');
+
+        const hasSelectedItems = totals.selected_items_count > 0;
+        const hasDiscount = totals.total_discount_percent > 0;
+
+        if (hasSelectedItems)
+            rowTotalQty.style.display = hasSelectedItems ? 'flex' : 'none';
+
+        if (rowPercent) {
+            rowPercent.style.display = hasDiscount ? 'flex' : 'none';
+            if (hasDiscount) document.getElementById('discount-percent-val').innerText = `%${totals.total_discount_percent}`;
+        }
+
+        if (rowAbs) {
+            rowAbs.style.display = hasDiscount ? 'flex' : 'none';
+            if (hasDiscount) document.getElementById('discount-abs-val').innerText = formatMoney(totals.total_discount);
+        }
+
+        // O rowSubtotal (preço riscado) só deve aparecer se houver desconto
+        if (rowSubtotal) {
+            rowSubtotal.style.display = hasDiscount ? 'flex' : 'none';
+        }
+    },
+
+    unmarkGlobalCartFilters() {
+        const filterAll = document.getElementById('filter-all');
+        const filterDiscount = document.getElementById('filter-discount');
+        if (filterAll) filterAll.checked = false;
+        if (filterDiscount) filterDiscount.checked = false;
+    },
+
+    toggleGlobalCartFilters(scope, isSelected) {
+        const filterAll = document.getElementById('filter-all');
+        const filterDiscount = document.getElementById('filter-discount');
+
+        if (scope === 'all' && isSelected) {
+            if (filterDiscount) filterDiscount.checked = false;
+        } else if (scope === 'discounted' && isSelected) {
+            if (filterAll) filterAll.checked = false;
+        }
+    },
+}
+
 const CartActions = {
-    // marcou ou desmarcou um item do carrinho
+    // marca ou desmara um item do carrinho
     async toggleSelection(variationId, isSelected) {
         const url = '/produtos/carrinho/update-selection/';
 
         // Usuário marcou/desmarcou um item, então ele personalizou o carrinho. Logo desmarcamos os filtros globais, se ativos.
-        unmarkGlobalCartFilters();
+        CartUI.unmarkGlobalCartFilters();
 
         try {
             const data = await CartAPI.updateItemSelection(variationId, isSelected, url);
             if (data.status === 'success') {
-                updateSummary(data);
+                CartUI.updateSummary(data);
             }
         } catch (error) {
             showAlert(error.message, error.tags)
@@ -47,35 +129,18 @@ const CartActions = {
 
     async handleFilterSelection(scope, isSelected) {
         const url = '/produtos/carrinho/update-selection/';
-        toggleGlobalCartFilters(scope, isSelected);
+        CartUI.toggleGlobalCartFilters(scope, isSelected);
         try {
             const data = await CartAPI.updateBatchSelection(scope, isSelected, url);
             
             if (data.status === 'success') {
                 // atualiza visualmente todos os checkboxes da lista
-                this.syncCheckboxesUI(scope, isSelected);
-                updateSummary(data);
+                CartUI.syncCheckboxesUI(scope, isSelected);
+                CartUI.updateSummary(data);
             }
         } catch (error) {
             showAlert(error.message, 'alert-danger');
         }
-    },
-
-    syncCheckboxesUI(scope, isSelected) {
-        const checks = document.querySelectorAll('.cart-item-check');
-        checks.forEach(check => {
-            if (scope === 'all') {
-                check.checked = isSelected;
-            } else if (scope === 'discounted') {
-                // captura e verifica o data-attribute no HTML do item (data-has-discount="true")
-                if (check.dataset.hasDiscount === 'true') {
-                    check.checked = isSelected;
-                } else {
-                    // se filtrar por "com desconto", os sem desconto devem desmarcar
-                    if(isSelected) check.checked = false;
-                }
-            }
-        });
     },
 
     async updateItemQuantity(input, steps) {
@@ -107,118 +172,46 @@ const CartActions = {
     }
 };
 
-// Event Listeners
-document.addEventListener('DOMContentLoaded', function() {
-    // Seleção dos Filtros do carrinho por ID
+const init = () => {
     const filterAll = document.getElementById('filter-all');
     const filterDiscount = document.getElementById('filter-discount');
+    const cartList = document.querySelector('.cart-items-list');
 
-    [filterAll, filterDiscount].forEach(filter => {
-        if (filter) {
-            filter.addEventListener('change', (e) => {
-                const scope = e.target.id === 'filter-all' ? 'all' : 'discounted';
-                CartActions.handleFilterSelection(scope, e.target.checked);
+    document.addEventListener('DOMContentLoaded', function() {
+        [filterAll, filterDiscount].forEach(filter => {
+            if (filter) {
+                filter.addEventListener('change', (e) => {
+                    const scope = e.target.id === 'filter-all' ? 'all' : 'discounted';
+                    CartActions.handleFilterSelection(scope, e.target.checked);
+                });
+            }
+        });
+
+        if (cartList) {
+            cartList.addEventListener('click', (e) => {
+                const qtyBtn = e.target.closest('.qty-btn');
+                if (qtyBtn) {
+                    const container = qtyBtn.closest('.quantity-container');
+                    const input = container.querySelector('.item-qty-input');
+                    const steps = qtyBtn.dataset.action === 'plus' ? 1: -1;
+                    CartActions.updateItemQuantity(input, steps);
+                    return; // Impede a continuação e execução do removeBtn
+                }
+                // Lógica do botão de remover item
+                const removeBtn = e.target.closest('.remove-btn');
+                if (removeBtn) {
+                    CartActions.removeItem(removeBtn.dataset.id, removeBtn);
+                }
+            });
+        
+            // Escutando mudanças para Checkboxes
+            cartList.addEventListener('change', (e) => {
+                if (e.target.classList.contains('cart-item-check')) {
+                    CartActions.toggleSelection(e.target.dataset.id, e.target.checked);
+                }
             });
         }
     });
+};
 
-    const cartList = document.querySelector('.cart-items-list');
-    
-    if (cartList) {
-        cartList.addEventListener('click', (e) => {
-            const qtyBtn = e.target.closest('.qty-btn');
-            if (qtyBtn) {
-                const container = qtyBtn.closest('.quantity-container');
-                const input = container.querySelector('.item-qty-input');
-                const steps = qtyBtn.dataset.action === 'plus' ? 1: -1;
-                CartActions.updateItemQuantity(input, steps);
-                return; // Impede a continuação e execução do removeBtn
-            }
-            // Lógica do botão de remover item
-            const removeBtn = e.target.closest('.remove-btn');
-            if (removeBtn) {
-                CartActions.removeItem(removeBtn.dataset.id, removeBtn);
-            }
-        });
-    
-        // Escutando mudanças para Checkboxes
-        cartList.addEventListener('change', (e) => {
-            if (e.target.classList.contains('cart-item-check')) {
-                CartActions.toggleSelection(e.target.dataset.id, e.target.checked);
-            }
-        });
-    }
-});
-
-/**
- * Funções de UI
- */
-function updateSummary(totals) {
-    const qtyEl = document.getElementById('total-qty');
-    const subtotalEl = document.getElementById('subtotal-val');
-    const grandTotalEl = document.getElementById('grand-total-val');
-
-    if (qtyEl) qtyEl.innerText = `x${totals.selected_items_count}`;
-    if (subtotalEl) subtotalEl.innerText = formatMoney(totals.cart_subtotal);
-    if (grandTotalEl) grandTotalEl.innerText = formatMoney(totals.grand_total);
-
-    // Visibilidade dos descontos
-    changeSummaryDataVisibility(totals);
-
-    if (typeof updateCartBadge === 'function') {
-        updateCartBadge(totals.total_items_count);
-    }
-}
-
-function changeSummaryDataVisibility(totals) {
-    const rowSubtotal = document.getElementById('row-subtotal');
-    const rowPercent = document.getElementById('row-discount-percent');
-    const rowAbs = document.getElementById('row-discount-abs');
-    const rowTotalQty = document.getElementById('row-total-qty');
-
-    const hasSelectedItems = totals.selected_items_count > 0;
-    const hasDiscount = totals.total_discount_percent > 0;
-
-    if (hasSelectedItems)
-        rowTotalQty.style.display = hasSelectedItems ? 'flex' : 'none';
-
-    if (rowPercent) {
-        rowPercent.style.display = hasDiscount ? 'flex' : 'none';
-        if (hasDiscount) document.getElementById('discount-percent-val').innerText = `%${totals.total_discount_percent}`;
-    }
-
-    if (rowAbs) {
-        rowAbs.style.display = hasDiscount ? 'flex' : 'none';
-        if (hasDiscount) document.getElementById('discount-abs-val').innerText = formatMoney(totals.total_discount);
-    }
-
-    // O rowSubtotal (preço riscado) só deve aparecer se houver desconto
-    if (rowSubtotal) {
-        rowSubtotal.style.display = hasDiscount ? 'flex' : 'none';
-    }
-}
-
-function unmarkGlobalCartFilters() {
-    const filterAll = document.getElementById('filter-all');
-    const filterDiscount = document.getElementById('filter-discount');
-    if (filterAll) filterAll.checked = false;
-    if (filterDiscount) filterDiscount.checked = false;
-}
-
-function toggleGlobalCartFilters(scope, isSelected) {
-    const filterAll = document.getElementById('filter-all');
-    const filterDiscount = document.getElementById('filter-discount');
-
-    if (scope === 'all' && isSelected) {
-        if (filterDiscount) filterDiscount.checked = false;
-    } else if (scope === 'discounted' && isSelected) {
-        if (filterAll) filterAll.checked = false;
-    }
-}
-
-function formatMoney(value) {
-    return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-    }).format(value);
-}
+init();

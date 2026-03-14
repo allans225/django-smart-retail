@@ -1,29 +1,6 @@
 import { AuthAPI } from '../../modules/api/auth.js'
 
-const FormsActions = {
-    async handleSubmit(e) {
-        e.preventDefault();
-        const form = e.target;
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const url = form.getAttribute('data-url');
-        const formData = new FormData(form);
-
-        this.visualChargingFeedback(submitBtn, "Processando...");
-
-        try {
-            const result = await AuthAPI.postAuth(url, formData);
-
-            if (result.status === 'success'){
-                // redirect da URL enviada pelo Django
-                window.location.href = result.redirect;
-            }
-        } catch (error) {
-            // Reativa o botão em caso de erro
-            this.visualChargingFeedback(submitBtn);
-            showAlert(error.message, error.tags)
-        }
-    },
-
+const FormsUI = {
     visualChargingFeedback(element, msg = null) {
         if (msg) {
             element.dataset.originalText = element.innerText;
@@ -53,7 +30,32 @@ const FormsActions = {
         
         // Rotação do ícone conforme o estado
         arrowIcon.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
-    }
+    } 
+}
+
+const FormsActions = {
+    async handleSubmit(e) {
+        e.preventDefault();
+        const form = e.target;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const url = form.getAttribute('data-url');
+        const formData = new FormData(form);
+
+        FormsUI.visualChargingFeedback(submitBtn, "Processando...");
+
+        try {
+            const result = await AuthAPI.postAuth(url, formData);
+
+            if (result.status === 'success'){
+                // redirect da URL enviada pelo Django
+                window.location.href = result.redirect;
+            }
+        } catch (error) {
+            // Reativa o botão em caso de erro
+            FormsUI.visualChargingFeedback(submitBtn);
+            showAlert(error.message, error.tags)
+        }
+    },
 };
 
 const init = () => {
@@ -67,10 +69,10 @@ const init = () => {
     }
 
     if (btnAddress)
-        btnAddress.addEventListener('click', FormsActions.toggleAddress);
+        btnAddress.addEventListener('click', FormsUI.toggleAddress);
 
     toggleLinks.forEach(link => {
-        link.addEventListener('click', (e) => FormsActions.switchAuthMode(e));
+        link.addEventListener('click', (e) => FormsUI.switchAuthMode(e));
     });
 
     // Estado inicial: Garante que apenas o Login apareça

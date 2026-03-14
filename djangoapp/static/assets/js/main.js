@@ -103,3 +103,10 @@ window.changeQty = (steps) =>{
         showAlert(`Apenas ${maxStock} unidades disponíveis em estoque.`, 'alert-info');
     }
 };
+
+window.formatMoney = (value) => {
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(value);
+}

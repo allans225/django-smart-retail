@@ -135,22 +135,24 @@ const DetailActions = {
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    // ouvintes de evento (Add to Cart)
+const init = () => {
     const addToCartBtn = document.querySelector('.btn-add-to-cart');
+    const variationList = document.querySelector('.variation-list');
+
     if (addToCartBtn) {
         addToCartBtn.addEventListener('click', (e) => {
             e.preventDefault();
             DetailActions.handleAddToCart();
         });
     }
-
+    
     // Delegação de clique para variações
-    const variationList = document.querySelector('.variation-list');
     if (variationList) {
         variationList.addEventListener('click', e => {
             const clickedItem = e.target.closest('.v-item');
             if (clickedItem) DetailActions.selectVariation(clickedItem);
         });
     }
-});
+};
+
+init();
