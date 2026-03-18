@@ -26,8 +26,14 @@ class Profile(models.Model):
     def clean(self):
         error_messages = {}
 
-        if self.birth_date and self.birth_date > date.today():
-            error_messages['birth_date'] = "A data de nascimento não pode ser no futuro."
+        if self.birth_date:
+            # Validação de data futura
+            if self.birth_date > date.today():
+                error_messages['birth_date'] = "A data de nascimento não pode ser no futuro."
+            
+            # Validação de idade irreal
+            elif self.age > 200:
+                error_messages['birth_date'] = "Data de nascimento não aplicável."
 
         if self.cpf and not validate_cpf(self.cpf):
             error_messages['cpf'] = "CPF inválido."

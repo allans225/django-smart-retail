@@ -335,7 +335,7 @@
     padding: 15px;
 }
 
-/* Definição das Áreas Principais */
+/* Definição das Áreas Principais - Product Detail */
     .title-block { grid-area: title; display: flex; align-items: center; justify-content: center; }
     .short-desc-block { grid-area: short-desc; }
     .variations-block { grid-area: variations; display: flex; flex-direction: column; justify-content: center; text-align: center;}
@@ -917,8 +917,8 @@ input:checked + .custom-checkbox::after {
 }
 
 .divider { 
-  border: 0.5px solid #eee; 
-  margin-bottom: 30px; 
+    border: 0.5px solid #eee; 
+    margin-bottom: 30px; 
 }
 
 .input-row { display: flex; gap: 10px; }
@@ -934,6 +934,44 @@ select.auth-input {
     background-repeat: no-repeat;
     background-position: right 1rem center;
     background-size: 1em;
+}
+
+/* Container para agrupar input + erro */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    transition: margin-bottom 0.2s ease;
+}
+
+/* Se o grupo contiver um erro com texto, aumentamos o espaçamento inferior */
+.input-group:has(.error-message:not(:empty)) {
+    margin-bottom: 1.2rem;
+}
+
+.error-message {
+    color: var(--cl-red);
+    font-size: 0.75rem;
+    font-weight: 500;
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+/* Quando o span NÃO estiver vazio, ele aparece */
+.error-message:not(:empty) {
+    max-height: 20px;
+    opacity: 1;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.auth-input.input-error {
+    border-color: var(--cl-danger) !important;
+    background-color: #fffafa;
 }
 
 .expand-trigger {

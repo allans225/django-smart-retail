@@ -33,17 +33,38 @@
                 <a href="#" class="toggle-link">Entrar <img src="{% static 'assets/img/icons/arrow-right-register.svg' %}" alt="Login"></a>
             </div>
             <hr class="divider">
-            <form id="register-form" method="POST">
-                {% csrf_token %} 
-                <input type="text" name="first_name" placeholder="Nome" class="auth-input">
-                <input type="text" name="last_name" placeholder="Sobrenome" class="auth-input">
-                <div class="input-row">
-                    <input type="text" name="birth_date" placeholder="Data de Aniversário" class="auth-input">
-                    <input type="text" name="username" placeholder="Nome de Usuário" class="auth-input">
+            <form id="register-form" method="POST" >
+                {% csrf_token %}
+                <div class="input-group">
+                    <input type="text" name="first_name" placeholder="Nome" class="auth-input">
+                    <span class="error-message" id="error-first_name"></span>
                 </div>
-                <input type="email" name="email" placeholder="E-mail" class="auth-input">
-                <input type="password" name="password" placeholder="Senha" class="auth-input">
-                <input type="password" name="confirm_password" placeholder="Confirmar Senha" class="auth-input">
+                <div class="input-group">
+                    <input type="text" name="last_name" placeholder="Sobrenome" class="auth-input">
+                    <span class="error-message" id="error-last_name"></span>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <input type="text" name="birth_date" placeholder="Data de Aniversário" class="auth-input">
+                        <span class="error-message" id="error-birth_date"></span>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" name="username" placeholder="Nome de Usuário" class="auth-input">
+                        <span class="error-message" id="error-username"></span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <input type="email" name="email" placeholder="E-mail" class="auth-input">
+                    <span class="error-message" id="error-email"></span>
+                </div>
+                <div class="input-group">
+                    <input type="password" name="password" placeholder="Senha" class="auth-input">
+                    <span class="error-message" id="error-password"></span>
+                </div>
+                <div class="input-group">
+                    <input type="password" name="confirm_password" placeholder="Confirmar Senha" class="auth-input">
+                    <span class="error-message" id="error-confirm_password"></span>
+                </div>
 
                 <div class="expand-trigger">
                     <button type="button" id="btn-address" class="btn-expand">

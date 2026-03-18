@@ -63,10 +63,22 @@ const init = () => {
     const btnAddress = document.getElementById('btn-address');
     const authCards = document.querySelectorAll('.auth-card');
     const toggleLinks = document.querySelectorAll('.toggle-link');
+    const authInputs = document.querySelectorAll('.auth-input');
 
-    if (loginForm){
-        loginForm.addEventListener('submit', (e) => FormsActions.handleSubmit(e));
+    // Limpador: remove a classe de erro assim que o usuário começar a digitar novamente
+    if (authInputs.length > 0) {
+        authInputs.forEach(input => {
+            input.addEventListener('input', () => {
+                input.classList.remove('input-error'); // remove borda vermelha
+                const errorSpan = document.getElementById(`error-${input.name}`);  // busca o span correspondente
+                if (errorSpan) 
+                    errorSpan.innerText = ''; // Ao definir como vazio, o CSS (:empty) vai esconder o espaçamento
+            });
+        });
     }
+
+    if (loginForm)
+        loginForm.addEventListener('submit', (e) => FormsActions.handleSubmit(e));
 
     if (btnAddress)
         btnAddress.addEventListener('click', FormsUI.toggleAddress);
