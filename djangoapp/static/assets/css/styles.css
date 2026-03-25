@@ -957,16 +957,20 @@ select.auth-input {
     max-height: 0;
     opacity: 0;
     margin-top: 0;
+    display: block;
     overflow: hidden;
     transition: all 0.2s ease;
 }
 
-/* Quando o span NÃO estiver vazio, ele aparece */
-.error-message:not(:empty) {
-    max-height: 20px;
-    opacity: 1;
-    margin-top: 4px;
-    margin-bottom: 4px;
+.error-message {
+    color: #e74c3c !important; /* Vermelho forte */
+    font-size: 0.75rem;
+    font-weight: bold;
+    display: block !important; /* Força o bloco */
+    visibility: visible !important;
+    opacity: 1 !important;
+    max-height: none !important; /* Remove a restrição de altura */
+    min-height: 10px; /* Garante um espaço mínimo */
 }
 
 .auth-input.input-error {

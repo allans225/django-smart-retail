@@ -117,7 +117,7 @@ class RegisterView(View):
                 return JsonResponse({
                     'status': 'error',
                     'message': 'Erro de validação. Verifique os dados!',
-                    'errors': e.message_dict  # Envia os erros para o JS pintar nos campos
+                    'errors': e.message_dict  # Envia os erros para o JS printar nos campos
                 }, status=400)
 
             except IntegrityError:

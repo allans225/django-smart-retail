@@ -33,7 +33,7 @@
                 <a href="#" class="toggle-link">Entrar <img src="{% static 'assets/img/icons/arrow-right-register.svg' %}" alt="Login"></a>
             </div>
             <hr class="divider">
-            <form id="register-form" method="POST" >
+            <form id="register-form" method="POST" data-url="{% url 'account:register' %}">
                 {% csrf_token %}
                 <div class="input-group">
                     <input type="text" name="first_name" placeholder="Nome" class="auth-input">
@@ -45,7 +45,7 @@
                 </div>
                 <div class="input-row">
                     <div class="input-group">
-                        <input type="text" name="birth_date" placeholder="Data de Aniversário" class="auth-input">
+                        <input type="date" name="birth_date" placeholder="Data de Aniversário" class="auth-input">
                         <span class="error-message" id="error-birth_date"></span>
                     </div>
                     <div class="input-group">
@@ -62,8 +62,8 @@
                     <span class="error-message" id="error-password"></span>
                 </div>
                 <div class="input-group">
-                    <input type="password" name="confirm_password" placeholder="Confirmar Senha" class="auth-input">
-                    <span class="error-message" id="error-confirm_password"></span>
+                    <input type="password" name="confirm_passw" placeholder="Confirmar Senha" class="auth-input">
+                    <span class="error-message" id="error-confirm_passw"></span>
                 </div>
 
                 <div class="expand-trigger">

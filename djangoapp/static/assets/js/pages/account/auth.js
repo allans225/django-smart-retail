@@ -37,6 +37,11 @@ const FormsActions = {
     async handleSubmit(e) {
         e.preventDefault();
         const form = e.target;
+
+        // LIMPEZA INICIAL: Remove todos os erros visíveis antes de tentar novamente
+        form.querySelectorAll('.error-message').forEach(span => span.innerText = '');
+        form.querySelectorAll('.auth-input').forEach(input => input.classList.remove('input-error'));
+
         const submitBtn = form.querySelector('button[type="submit"]');
         const url = form.getAttribute('data-url');
         const formData = new FormData(form);
@@ -45,7 +50,6 @@ const FormsActions = {
 
         try {
             const result = await AuthAPI.postAuth(url, formData);
-
             if (result.status === 'success'){
                 // redirect da URL enviada pelo Django
                 window.location.href = result.redirect;
@@ -53,13 +57,50 @@ const FormsActions = {
         } catch (error) {
             // Reativa o botão em caso de erro
             FormsUI.visualChargingFeedback(submitBtn);
-            showAlert(error.message, error.tags)
+
+            console.log("Objeto de erro capturado:", error) // debug
+
+            // Verifica se existem erros específicos por campo vindos do servidor
+            if(error.errors) {
+                Object.keys(error.errors).forEach(fieldName => {
+
+                    // Trata o erro global "__all__" jogando para o showAlert
+                    if (fieldName === '__all__') {
+                        const globalMessage = error.errors['__all__'][0].message;
+                        showAlert(globalMessage, 'alert-danger');
+                        return; // pula para o próximo campo
+                    }
+
+                    const errorSpan = document.getElementById(`error-${fieldName}`);
+                    const inputField = form.querySelector(`[name="${fieldName}"]`);
+
+                    if (errorSpan) {
+                        // O get_json_data() do django, enviando uma lista de objs
+                        const message = error.errors[fieldName][0].message || error.errors[fieldName][0];
+                        errorSpan.innerText = message;
+                        
+                        errorSpan.style.display = 'block';
+                        errorSpan.style.maxHeight = 'none';
+                        errorSpan.style.opacity = '1';
+                        
+                        if (inputField) {
+                            inputField.classList.add('input-error');
+                        }
+                    } else {
+                        console.warn(`Aviso: Span error-${fieldName} não encontrado no HTML`)
+                    }
+                });
+            }
+            // Mostra apenas o alert geral se não for um erro específico de campo ou se for um erro principal
+            if(error.message && !error.errors)
+                showAlert(error.message, 'alert-danger')
         }
     },
 };
 
 const init = () => {
     const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
     const btnAddress = document.getElementById('btn-address');
     const authCards = document.querySelectorAll('.auth-card');
     const toggleLinks = document.querySelectorAll('.toggle-link');
@@ -79,6 +120,9 @@ const init = () => {
 
     if (loginForm)
         loginForm.addEventListener('submit', (e) => FormsActions.handleSubmit(e));
+
+    if (registerForm)
+        registerForm.addEventListener('submit', (e) => FormsActions.handleSubmit(e));
 
     if (btnAddress)
         btnAddress.addEventListener('click', FormsUI.toggleAddress);

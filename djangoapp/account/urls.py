@@ -9,6 +9,7 @@ urlpatterns = [
 
     # Endpoints para AJAX
     path('api/login/', views.LoginView.as_view(), name='login'),
+    path('api/register/', views.RegisterView.as_view(), name='register'),
 
     # Logout
     path('logout/', views.LogoutView.as_view(), name='logout'),

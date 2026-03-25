@@ -25,10 +25,11 @@ async function getPostData(url, formData) {
             throw {
                 status: response.status,
                 message: data.message || 'Falha na comunicação com o servidor',
+                errors: data.errors || null, 
                 tags: data.tags || 'alert-danger'
             };
         }
-        return data; // Sucesso
+        return data;
     } catch (error) {
         // Se for um erro de rede (fetch falhou antes do json)
         if (!error.status) {
