@@ -7,6 +7,7 @@ from django.db import transaction
 
 from django.contrib.auth.models import User
 from .models import Profile
+from .models import Address
 
 from django.views.generic import TemplateView
 from django.http import JsonResponse
@@ -14,14 +15,19 @@ from django.views import View
 from .forms import LoginForm, RegisterForm
 
 from django.contrib.auth import authenticate, login
-from django.contrib.auth import logout
 from django.shortcuts import redirect
+from django.contrib.auth import logout
 
 class AuthView(TemplateView):
     template_name = 'account/login-register.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        context['form'] = RegisterForm()
+        context['states'] = Address._meta.get_field('state').choices
+        context['countries'] = Address._meta.get_field('country').choices
+
         return context
 
 class LogoutView(View):
@@ -102,6 +108,20 @@ class RegisterView(View):
                     profile = Profile(user=user, birth_date=form.cleaned_data.get('birth_date'))
                     profile.full_clean() # Validações no método do model
                     profile.save()
+                    
+                    zipcode = form.cleaned_data.get('zip_code')
+                    if zipcode:
+                        Address.objects.create(
+                            profile=profile,
+                            zip_code=zipcode,
+                            number=form.cleaned_data.get('number'),
+                            street=form.cleaned_data.get('street'),
+                            neighborhood=form.cleaned_data.get('neighborhood'),
+                            city=form.cleaned_data.get('city'),
+                            state=form.cleaned_data.get('state'),
+                            country=form.cleaned_data.get('country'),
+                            supplement=form.cleaned_data.get('supplement'),
+                        )
 
                 # Logar o usuário automaticamente
                 login(request, user)

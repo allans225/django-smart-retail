@@ -36,33 +36,33 @@
             <form id="register-form" method="POST" data-url="{% url 'account:register' %}">
                 {% csrf_token %}
                 <div class="input-group">
-                    <input type="text" name="first_name" placeholder="Nome" class="auth-input">
+                    <input type="text" name="first_name" placeholder="Nome" class="auth-input" required>
                     <span class="error-message" id="error-first_name"></span>
                 </div>
                 <div class="input-group">
-                    <input type="text" name="last_name" placeholder="Sobrenome" class="auth-input">
+                    <input type="text" name="last_name" placeholder="Sobrenome" class="auth-input" required>
                     <span class="error-message" id="error-last_name"></span>
                 </div>
                 <div class="input-row">
                     <div class="input-group">
-                        <input type="date" name="birth_date" placeholder="Data de Aniversário" class="auth-input">
+                        <input type="date" name="birth_date" placeholder="Data de Aniversário" class="auth-input" required>
                         <span class="error-message" id="error-birth_date"></span>
                     </div>
                     <div class="input-group">
-                        <input type="text" name="username" placeholder="Nome de Usuário" class="auth-input">
+                        <input type="text" name="username" placeholder="Nome de Usuário" class="auth-input" required>
                         <span class="error-message" id="error-username"></span>
                     </div>
                 </div>
                 <div class="input-group">
-                    <input type="email" name="email" placeholder="E-mail" class="auth-input">
+                    <input type="email" name="email" placeholder="E-mail" class="auth-input" required>
                     <span class="error-message" id="error-email"></span>
                 </div>
                 <div class="input-group">
-                    <input type="password" name="password" placeholder="Senha" class="auth-input">
+                    <input type="password" name="password" placeholder="Senha" class="auth-input" required>
                     <span class="error-message" id="error-password"></span>
                 </div>
                 <div class="input-group">
-                    <input type="password" name="confirm_passw" placeholder="Confirmar Senha" class="auth-input">
+                    <input type="password" name="confirm_passw" placeholder="Confirmar Senha" class="auth-input" required>
                     <span class="error-message" id="error-confirm_passw"></span>
                 </div>
 
@@ -74,7 +74,7 @@
 
                 <div id="address-section" class="address-collapsible">
                     <div class="input-row">
-                        <input type="text" name="zipcode" placeholder="CEP" class="auth-input">
+                        <input type="text" name="zip_code" placeholder="CEP" class="auth-input">
                         <input type="text" name="number" placeholder="Número" class="auth-input">
                     </div>
 
@@ -84,10 +84,17 @@
 
                     <div class="input-row">
                         <select name="state" class="auth-input">
-                            <option disabled selected>Estado</option>
+                            <option value="" disabled selected>Estado</option>
+                            {% for value, label in states %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
                         </select>
+
                         <select name="country" class="auth-input">
-                            <option disabled selected>País</option>
+                            <option value="" disabled selected>País</option>
+                            {% for value, label in countries %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
                         </select>
                     </div>
 
@@ -99,9 +106,7 @@
         </section>
     </div>
 </main>
-
+{% endblock %}
 {% block scripts %}
     <script type="module" src="{% static 'assets/js/pages/account/auth.js' %}"></script>
 {% endblock  %}
-
-{% endblock %}

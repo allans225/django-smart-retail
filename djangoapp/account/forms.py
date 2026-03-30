@@ -1,10 +1,12 @@
 from django import forms
 from datetime import datetime
 from django.contrib.auth.models import User
+from .models import Address
 from django.core.validators import MinLengthValidator, MaxLengthValidator, EmailValidator
 
 from django.contrib.auth.password_validation import validate_password
 from utils.validator.text import validate_no_special_chars
+from utils.validator.cep import look_up_cep
 
 class BasicAuthData(forms.Form):
     email = forms.EmailField(
@@ -43,8 +45,21 @@ class RegisterForm(BasicAuthData):
     birth_date = forms.CharField(widget=forms.TextInput(attrs={'class': 'auth-input', 'placeholder': 'Data de Aniversário'}))
     confirm_passw = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'auth-input', 'placeholder': 'Confirmar Senha'}))
 
+    # campos de endereço são OPCIONAIS no formulário de registro de usuário.
+    zip_code = forms.CharField(max_length=8, required=False,widget=forms.TextInput(attrs={'placeholder': 'CEP'}))
+    number = forms.CharField(max_length=10, required=False, widget=forms.TextInput(attrs={'placeholder': 'Número'}))
+    street = forms.CharField(max_length=128, required=False, widget=forms.TextInput(attrs={'placeholder': 'Rua'}))
+    neighborhood = forms.CharField(max_length=64, required=False, widget=forms.TextInput(attrs={'placeholder': 'Bairro'}))
+    city = forms.CharField(max_length=64, required=False, widget=forms.TextInput(attrs={'placeholder': 'Cidade'}))
+    state = forms.ChoiceField(required=False, choices=Address._meta.get_field('state').choices)
+    country = forms.ChoiceField(required=False, choices=Address._meta.get_field('country').choices)
+    supplement = forms.CharField(max_length=128, required=False, widget=forms.TextInput(attrs={'placeholder': 'Complemento'}))
+
     # Garante que a ordem dos dados no Python bata com o HTML
-    field_order = ['first_name', 'last_name', 'birth_date', 'username', 'email', 'password', 'confirm_passw']
+    field_order = [
+        'first_name', 'last_name', 'birth_date', 'username', 'email', 'password', 'confirm_passw', # user data
+        'zip_code', 'number', 'street', 'neighborhood', 'city', 'state', 'country', 'supplement' # user address
+    ]
 
     # Métodos de validação
     def clean(self):
@@ -89,3 +104,13 @@ class RegisterForm(BasicAuthData):
             return datetime.strptime(date, "%Y-%m-%d").date()
         except ValueError:
             raise forms.ValidationError("Formato de data inválido")
+        
+    def clean_zip_code(self):
+        cep = self.cleaned_data.get('zip_code')
+        # campo não obrigatório
+        if not cep:
+            return cep
+        # se preenchido, validamos na API
+        if not look_up_cep(cep):
+            raise forms.ValidationError("CEP inválido ou não encontrado.")
+        return cep
