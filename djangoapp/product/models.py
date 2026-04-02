@@ -1,9 +1,7 @@
 from django.db import models
 from django.urls import reverse
 
-
 from utils import generate
-from utils.images import process_image_for_webp
 from utils.files import get_file_path
 
 class Category(models.Model):

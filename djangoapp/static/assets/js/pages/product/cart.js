@@ -28,7 +28,7 @@ const CartUI = {
         if (grandTotalEl) grandTotalEl.innerText = formatMoney(totals.grand_total);
 
         // Visibilidade dos descontos
-        changeSummaryDataVisibility(totals);
+        this.changeSummaryDataVisibility(totals);
 
         if (typeof updateCartBadge === 'function') {
             updateCartBadge(totals.total_items_count);
@@ -51,6 +51,7 @@ const CartUI = {
             rowPercent.style.display = hasDiscount ? 'flex' : 'none';
             if (hasDiscount) document.getElementById('discount-percent-val').innerText = `%${totals.total_discount_percent}`;
         }
+
 
         if (rowAbs) {
             rowAbs.style.display = hasDiscount ? 'flex' : 'none';
@@ -118,7 +119,7 @@ const CartActions = {
                         location.reload(); // Recarrega a página para mostrar o estado do carrinho vazio
                         return;
                     } 
-                    updateSummary(data);
+                    CartUI.updateSummary(data);
                 }, 300);
                 showAlert(data.message, 'alert-success');
             }
@@ -164,7 +165,7 @@ const CartActions = {
             
             if (data.status === 'success') {
                 input.value = newVal; // Atualiza o input na tela
-                updateSummary(data);  // Recalcula os totais
+                CartUI.updateSummary(data);  // Recalcula os totais
             }
         } catch (error) {
             showAlert(error.message, 'alert-danger');

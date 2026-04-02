@@ -109,4 +109,4 @@ window.formatMoney = (value) => {
         style: 'currency',
         currency: 'BRL'
     }).format(value);
-}
+};
