@@ -120,7 +120,7 @@
                 </div>
 
                 <button class="btn-primary checkout-btn" 
-                    href="{% url 'order:checkout_summary' %}" 
+                    onclick="location.href='{% url 'order:checkout_summary' %}'" 
                     style="display: {% if selected_items_count > 0 %}block{% else %}none{% endif %};"
                 >
                     Continuar
