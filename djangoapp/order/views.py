@@ -11,4 +11,4 @@ class CheckoutSummaryView(View):
             messages.warning(self.request, "Faça login para finalizar seu pedido.")
             return redirect('account:auth_page')
         
-        return render(self.request, self.template_name, self.get_context())
+        return render(self.request, self.template_name, {})

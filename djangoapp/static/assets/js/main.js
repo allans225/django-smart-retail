@@ -37,6 +37,8 @@ const processDjangoMessages = () => {
 document.addEventListener('DOMContentLoaded', processDjangoMessages);
 
 window.showAlert = (message, tags) => {
+    // Se 'tag' for undefined ou null, assume 'error' como padrão
+    const providedTag = tags || 'error';
     let wrapper = document.querySelector('.messages-wrapper');
 
     if(!wrapper) {
@@ -45,14 +47,30 @@ window.showAlert = (message, tags) => {
         document.body.appendChild(wrapper);
     }
 
+    let finalClass = '';
+    
+    // Lógica de detecção e mapeamento de tags vindas do Django
+    if (providedTag.startsWith('alert-')) {
+        finalClass = providedTag;
+    } else {
+        const tagMap = {
+            'error': 'alert-danger',
+            'success': 'alert-success',
+            'warning': 'alert-warning',
+            'info': 'alert-info',
+            'debug': 'alert-info'
+        };
+        // Se a tag não estiver no mapa (ex: 'error'), usa alert-danger
+        finalClass = tagMap[providedTag] || `alert-danger`; 
+    }
+
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert ${tags}`;
     alertDiv.setAttribute('role', 'alert');
 
-    let iconName = 'msg-debu.svg';
-    if (tags === 'alert-success') iconName = 'msg-suss.svg';
-    else if (tags === 'alert-danger') iconName = 'msg-dang.svg';
-    else if (tags === 'alert-info') iconName = 'msg-info.svg';
+    let iconName = 'msg-info.svg';
+    if (finalClass.includes('success')) iconName = 'msg-suss.svg';
+    else if (finalClass.includes('danger')) iconName = 'msg-dang.svg';
 
     alertDiv.innerHTML = `
         <span class="alert-icon">
