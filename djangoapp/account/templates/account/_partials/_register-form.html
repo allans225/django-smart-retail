@@ -1,0 +1,44 @@
+{% load static %}
+<form id="register-form" method="POST" data-url="{% url 'account:register' %}">
+    {% csrf_token %}
+    <div class="input-group">
+        <input type="text" name="first_name" placeholder="Nome" class="auth-input" required>
+        <span class="error-message" id="error-first_name"></span>
+    </div>
+    <div class="input-group">
+        <input type="text" name="last_name" placeholder="Sobrenome" class="auth-input" required>
+        <span class="error-message" id="error-last_name"></span>
+    </div>
+    <div class="input-row">
+        <div class="input-group">
+            <input type="date" name="birth_date" placeholder="Data de Aniversário" class="auth-input" required>
+            <span class="error-message" id="error-birth_date"></span>
+        </div>
+        <div class="input-group">
+            <input type="text" name="username" placeholder="Nome de Usuário" class="auth-input" required>
+            <span class="error-message" id="error-username"></span>
+        </div>
+    </div>
+    <div class="input-group">
+        <input type="email" name="email" placeholder="E-mail" class="auth-input" required>
+        <span class="error-message" id="error-email"></span>
+    </div>
+    <div class="input-group">
+        <input type="password" name="password" placeholder="Senha" class="auth-input" required>
+        <span class="error-message" id="error-password"></span>
+    </div>
+    <div class="input-group">
+        <input type="password" name="confirm_passw" placeholder="Confirmar Senha" class="auth-input" required>
+        <span class="error-message" id="error-confirm_passw"></span>
+    </div>
+
+    <div class="expand-trigger">
+        <button type="button" id="btn-address" class="btn-expand">
+            Anexar um Endereço <img id="arrow-icon" src="{% static 'assets/img/icons/arrow-down-register.svg' %}" alt="Anexar Endereço">
+        </button>
+    </div>
+
+    {% include 'account/_partials/_address-section.html' %}
+
+    <button type="submit" class="btn-auth-black">Registrar</button>
+</form>

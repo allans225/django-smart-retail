@@ -90,36 +90,9 @@
             <section class="block order-summary">
                 <h2>Resumo da Compra</h2>
                 
-                <div class="summary-details">
-                    <div class="summary-line" id="row-total-qty" style="display: {% if selected_items_count > 0 %}flex{% else %}none{% endif %};">
-                        <span class="label">Quantidade de Produtos</span>
-                        <span id="total-qty">x{{ selected_items_count }}</span>
-                    </div>
+                {% include 'product/partial/_summary-details.html' %}
 
-                    <div class="summary-line" id="row-subtotal" style="display: {% if total_discount_percent > 0 %}flex{% else %}none{% endif %};">
-                        <span class="label">Subtotal</span>
-                        <span id="subtotal-val">{{ cart_subtotal|price_filter }}</span>
-                    </div>
-                
-                    <div class="summary-line" id="row-discount-percent" style="display: {% if total_discount_percent > 0 %}flex{% else %}none{% endif %};">
-                        <span class="label">Desconto Porcentual</span>
-                        <span id="discount-percent-val" class="text-green">{{total_discount_percent}}%</span>
-                    </div>
-
-                    <div class="summary-line" id="row-discount-abs" style="display: {% if total_discount > 0 %}flex{% else %}none{% endif %};">
-                        <span class="label">Valor Descontado</span>
-                        <span id="discount-abs-val" class="text-green">- {{ total_discount|price_filter }}</span>
-                    </div>
-                    
-                    <hr class="summary-divider">
-
-                    <div class="summary-line total">
-                        <span class="label">Total a Pagar</span>
-                        <span id="grand-total-val" class="text-green">{{ grand_total|price_filter }}</span>
-                    </div>
-                </div>
-
-                <button class="btn-primary checkout-btn" 
+                <button class="btn-primary checkout-btn"
                     onclick="location.href='{% url 'order:checkout_summary' %}'" 
                     style="display: {% if selected_items_count > 0 %}block{% else %}none{% endif %};"
                 >
@@ -128,7 +101,7 @@
             </section>
 
             <div class="block continue-shopping">
-                <a href="{% url 'product:all' %}" class="block btn-continue">
+                <a href="{% url 'product:all' %}" class="block btn-back-link">
                     Continuar Comprando
                 </a>
             </div>

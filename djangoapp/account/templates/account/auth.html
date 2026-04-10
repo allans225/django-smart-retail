@@ -1,0 +1,29 @@
+{% extends 'static/base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="auth-page">
+    <div class="auth-wrapper">
+        <section class="auth-card"> <!-- Login section -->
+            <div class="card-header">
+                <h2>Iniciar Sessão</h2>
+                <a href="#" class="toggle-link">Registrar-se <img src="{% static 'assets/img/icons/arrow-right-register.svg' %}" alt="Login"></a>
+            </div>
+            <hr class="divider">
+            {% include 'account/_partials/_login-form.html' %}
+        </section>
+
+        <section class="auth-card"> <!-- Register Section -->
+            <div class="card-header">
+                <h2>Registro</h2>
+                <a href="#" class="toggle-link">Entrar <img src="{% static 'assets/img/icons/arrow-right-register.svg' %}" alt="Login"></a>
+            </div>
+            <hr class="divider">
+            {% include 'account/_partials/_register-form.html' %}
+        </section>
+    </div>
+</main>
+{% endblock %}
+{% block scripts %}
+    <script type="module" src="{% static 'assets/js/pages/account/auth.js' %}"></script>
+{% endblock  %}

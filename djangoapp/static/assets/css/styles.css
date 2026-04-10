@@ -583,9 +583,9 @@
 /* Carrinho */
 .cart-container {
     display: grid;
+    max-width: var(--max-header-width);
     grid-template-columns: 1fr 350px;
     gap: 20px;
-    max-width: var(--max-header-width);
     margin: 40px auto;
     padding: 0 20px;
 }
@@ -733,7 +733,7 @@
     padding: 15px;
 }
 
-.btn-continue {
+.btn-back-link {
     display: block;
     text-align: center;
     background: #000;
@@ -761,6 +761,78 @@
 
 .continue-shopping {
     max-width: 500px;
+}
+.btn-back {
+    max-width: 500px;
+}
+
+/* Order Summary */
+
+.order-summary-container {
+    display: grid;
+    max-width: var(--max-header-width);
+    /* Define 2 colunas: a 1ª flexível, a 2ª com 350px */
+    grid-template-columns: 1fr 350px; 
+    gap: 30px;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.order-main {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+/* Blocos (Cards) */
+.summary-card {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.summary-card h3 {
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+/* Tabelas Zebradas */
+.zebra-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+    background-color: var(--cl-light-bg);
+    color: #555;
+}
+
+.zebra-table th {
+    text-align: left;
+    padding: 12px 15px;
+    font-weight: 500;
+}
+
+.zebra-table td {
+    padding: 12px 15px;
+}
+
+/* Efeito Zebrado: nth-child(odd) aplica nas linhas ímpares */
+.zebra-table tbody tr:nth-child(odd) {
+    background-color: #d9d9d9;
+    border-radius: 5px; 
+}
+
+.finish-order-btn {
+    padding: 15px;
+    font-weight: 600;
+}
+
+@media (max-width: 850px) {
+    .order-summary-container {
+        grid-template-columns: 1fr; /* Coluna única em telas menores */
+    }
 }
 
 /* Reutilização e customização do Checkbox */

@@ -1,0 +1,31 @@
+{% load product_filters %}
+{% load static %}
+
+<div class="summary-details">
+    <div class="summary-line" id="row-total-qty" style="display: {% if selected_items_count > 0 %}flex{% else %}none{% endif %};">
+        <span class="label">Quantidade de Produtos</span>
+        <span id="total-qty">x{{ selected_items_count }}</span>
+    </div>
+
+    <div class="summary-line" id="row-subtotal" style="display: {% if total_discount_percent > 0 %}flex{% else %}none{% endif %};">
+        <span class="label">Subtotal</span>
+        <span id="subtotal-val">{{ cart_subtotal|price_filter }}</span>
+    </div>
+
+    <div class="summary-line" id="row-discount-percent" style="display: {% if total_discount_percent > 0 %}flex{% else %}none{% endif %};">
+        <span class="label">Desconto Porcentual</span>
+        <span id="discount-percent-val" class="text-green">{{total_discount_percent}}%</span>
+    </div>
+
+    <div class="summary-line" id="row-discount-abs" style="display: {% if total_discount > 0 %}flex{% else %}none{% endif %};">
+        <span class="label">Valor Descontado</span>
+        <span id="discount-abs-val" class="text-green">- {{ total_discount|price_filter }}</span>
+    </div>
+    
+    <hr class="summary-divider">
+
+    <div class="summary-line total">
+        <span class="label"><strong>Total</strong></span>
+        <span id="grand-total-val" class="text-green">{{ grand_total|price_filter }}</span>
+    </div>
+</div>

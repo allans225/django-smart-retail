@@ -19,7 +19,7 @@ from django.shortcuts import redirect
 from django.contrib.auth import logout
 
 class AuthView(TemplateView):
-    template_name = 'account/login-register.html'
+    template_name = 'account/auth.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
