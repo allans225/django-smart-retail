@@ -4,6 +4,7 @@ from django.views import View
 from product.models import Variation
 
 from django.contrib import messages
+from utils.helper import cart_calculations as cart_helper
 
 class CheckoutSummaryView(View):
     template_name = 'order/order-summary.html'
@@ -52,19 +53,24 @@ class CheckoutSummaryView(View):
             elif float(cart_item.get('price', 0)) != current_price:
                 cart_item['price'] = current_price
                 cart_item['total_price'] = current_price * cart_item['qty']
+                messages.info(self.request, f"O preço de '{variation.product.name}' foi atualizado para R${current_price:.2f}.")
+                self.request.session.modified = True
               
         if error_found:
             self.request.session.modified = True  # Garante que a sessão seja salva após as alterações
             return redirect('product:cart_detail')
-        
 
-        cart_total_price = sum(float(item['total_price']) for item in cart.values())
-        cart_total_qty = sum(item['qty'] for item in cart.values())
+        if not cart or len(cart) == 0:
+            messages.warning(self.request, "Seu carrinho ficou vazio após as atualizações. Adicione produtos para finalizar seu pedido.")
+            return redirect('product:cart_detail')
+
+        # cart_total_price = sum(float(item['total_price']) for item in cart.values())
+        # cart_total_qty = sum(item['qty'] for item in cart.values())
+        cart_totals = cart_helper.get_cart_totals(cart, db_variations)
 
         context = {
             'cart': cart,
-            'cart_total_price': cart_total_price,
-            'cart_total_qty': cart_total_qty,
+            **cart_totals
         }
 
         return render(self.request, self.template_name, context)
