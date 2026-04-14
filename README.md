@@ -31,4 +31,4 @@
 
 > docker-compose up --build
 
-* Acesse a aplicação: O servidor estará disponível em http://localhost:8000.
+* Acesse a aplicação: O servidor estará disponível em http://127.0.0.1:8000/produtos/all/
