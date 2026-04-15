@@ -122,7 +122,7 @@ body { margin: 0; }
   --cl-blue: hsl(202, 100%, 61%);
   --cl-blue-light: hsla(202, 100%, 60%, 0.150);
 
-  --cl-info: hsl(60, 100%, 67%);
+  --cl-info: hsl(60, 90%, 48%);
   --cl-danger: hsl(5, 83%, 53%);
   --cl-warning: hsl(33, 87%, 58%);
   --cl-success: hsl(106, 96%, 64%);
