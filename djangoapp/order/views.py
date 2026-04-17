@@ -3,6 +3,7 @@ from utils.validator import cart as cart_auth
 from django.views import View
 
 from product.models import Variation
+from utils.validator.address import get_user_address
 
 from django.contrib import messages
 from utils.helper import cart_calculations as cart_helper
@@ -16,6 +17,13 @@ class CheckoutSummaryView(View):
             messages.warning(self.request, "Faça login para finalizar seu pedido.")
             return redirect('account:auth_page')
         
+        address = get_user_address(self.request.user)
+
+        if not address:
+            messages.warning(self.request, "Adicione um endereço para finalizar seu pedido.")
+            # >> TO DO: Redirecionar para a página de gerenciamento de endereços nas configurações do perfil
+            return redirect('account:auth_page')
+
         cart = self.request.session.get('cart')
 
         # Proteção contra acesso direto sem itens no carrinho
@@ -48,8 +56,23 @@ class CheckoutSummaryView(View):
 
         cart_totals = cart_helper.get_cart_totals(cart, db_variations)
 
+        # Convertendo o carrinho para uma lista de itens detalhados para renderização no template
+        variations_dict = {str(v.id): v for v in db_variations}
+        cart_items_template = []
+        for vid, data in cart.items():
+            variation = variations_dict.get(str(vid))
+            if variation:
+                cart_items_template.append({
+                    'variation': variation,
+                    'quantity': data.get('qty', 0),
+                    'price': data.get('price', 0),
+                    'total_price': data.get('qty', 0) * data.get('price', 0),
+                })
+
         context = {
+            'address': address,
             'cart': cart,
+            'cart_items': cart_items_template,
             **cart_totals
         }
 

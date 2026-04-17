@@ -9,9 +9,9 @@
             <h3>Endereço Para Entregar</h3>
             <table class="zebra-table">
                 <tbody>
-                    <tr><td>Avenida Américo Vespúcio Vila Euler 2771</td></tr>
-                    <tr><td>Resort Fazenda, Casa 80</td></tr>
-                    <tr><td>Curitiba, PR, BR - 83305-000</td></tr>
+                    <tr><td>{{ address.street }} {{ address.neighborhood }} {{ address.number }}</td></tr>
+                    <tr><td>{{ address.complement }}</td></tr>
+                    <tr><td>{{ address.city }}, {{ address.state }}, {{ address.country }} - {{ address.zip_code }}</td></tr>
                 </tbody>
             </table>
         </section>
@@ -28,24 +28,22 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {% for item in cart_items %}
                     <tr>
-                        <td>Nome do Produto e Variação</td>
-                        <td>1</td>
-                        <td>R$ 10,00</td>
-                        <td>R$ 10,00</td>
+                        <td>{{ item.variation.product.name|truncatechars:15 }} - {{ item.variation.name|truncatechars:15 }}</td>
+                        <td>{{ item.quantity }}</td>
+
+                        {% with var=item.variation %}
+                            {% if var.promotional_price > 0 and var.promotional_price < var.price %}
+                                <td>{{ var.promotional_price|price_filter }}</td>
+                            {% else %}
+                                <td>{{ var.price|price_filter }}</td>
+                            {% endif %}
+                        {% endwith %}
+
+                        <td>{{ item.total_price|price_filter }}</td>
                     </tr>
-                    <tr>
-                        <td>Nome do Produto e Variação</td>
-                        <td>2</td>
-                        <td>R$ 10,00</td>
-                        <td>R$ 20,00</td>
-                    </tr>
-                    <tr>
-                        <td>Nome do Produto e Variação</td>
-                        <td>3</td>
-                        <td>R$ 10,00</td>
-                        <td>R$ 30,00</td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </section>

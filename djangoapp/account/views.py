@@ -120,7 +120,7 @@ class RegisterView(View):
                             city=form.cleaned_data.get('city'),
                             state=form.cleaned_data.get('state'),
                             country=form.cleaned_data.get('country'),
-                            supplement=form.cleaned_data.get('supplement'),
+                            complement=form.cleaned_data.get('complement'),
                         )
 
                 # Logar o usuário automaticamente

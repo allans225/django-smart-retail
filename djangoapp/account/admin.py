@@ -7,7 +7,7 @@ class AddressInline(admin.TabularInline):
 
     fields = (
         'street', 'number', 'neighborhood', 
-        'supplement', 'city', 'state', 'zip_code'
+        'complement', 'city', 'state', 'zip_code'
     )
 
 class ProfileAdmin(admin.ModelAdmin):

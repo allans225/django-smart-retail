@@ -53,12 +53,12 @@ class RegisterForm(BasicAuthData):
     city = forms.CharField(max_length=64, required=False, widget=forms.TextInput(attrs={'placeholder': 'Cidade'}))
     state = forms.ChoiceField(required=False, choices=Address._meta.get_field('state').choices)
     country = forms.ChoiceField(required=False, choices=Address._meta.get_field('country').choices)
-    supplement = forms.CharField(max_length=128, required=False, widget=forms.TextInput(attrs={'placeholder': 'Complemento'}))
+    complement = forms.CharField(max_length=128, required=False, widget=forms.TextInput(attrs={'placeholder': 'Complemento'}))
 
     # Garante que a ordem dos dados no Python bata com o HTML
     field_order = [
         'first_name', 'last_name', 'birth_date', 'username', 'email', 'password', 'confirm_passw', # user data
-        'zip_code', 'number', 'street', 'neighborhood', 'city', 'state', 'country', 'supplement' # user address
+        'zip_code', 'number', 'street', 'neighborhood', 'city', 'state', 'country', 'complement' # user address
     ]
 
     # Métodos de validação
