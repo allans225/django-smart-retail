@@ -88,20 +88,41 @@ class AddToCartView(View):
             }, status=400)
 
         cart = request.session.get('cart', {})
-        
         # forçando a chave a ser string para evitar erros de serialização JSON
         vid_str = str(variation_id)
+
+        price = float(variation.get_price())  # Garante que o preço seja armazenado como float para JSON
 
         if vid_str in cart:
             # Se for dicionário, atualiza qty
             if isinstance(cart[vid_str], dict):
-                cart[vid_str]['qty'] = min(cart[vid_str]['qty'] + quantity, variation.stock)
+                # Garante que a quantidade não ultrapasse o estoque disponível
+                new_qty = min(cart[vid_str]['qty'] + quantity, variation.stock)
+                cart[vid_str]['qty'] = new_qty
+                # atualizamos o preço e o total_price no update
+                cart[vid_str]['price'] = price
+                cart[vid_str]['total_price'] = price * new_qty
             else:
                 # Se for int (formato antigo), converte para dict
                 old_qty = cart[vid_str]
-                cart[vid_str] = {'qty': min(old_qty + quantity, variation.stock), 'selected': True}
+                new_qty = min(old_qty + quantity, variation.stock)
+                cart[vid_str] = {
+                    'qty': new_qty,
+                    'price': price,
+                    'total_price': price * new_qty,
+                    'selected': True,
+                    'product_name': variation.product.name,
+                    'variation_name': variation.name,
+                }
         else:
-            cart[vid_str] = {'qty': quantity, 'selected': True}
+            cart[vid_str] = {
+                'qty': quantity, 
+                'price': price,
+                'total_price': price * quantity,
+                'selected': True, 
+                'product_name': variation.product.name,
+                'variation_name': variation.name
+            }
 
         request.session['cart'] = cart
         request.session.modified = True

@@ -45,7 +45,7 @@ class OrderItem(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
 
     def __str__(self):
-        return f"Item {self.name_product} do Pedido N. {self.order.pk}"
+        return f"Item {self.product_name} do Pedido N. {self.order.pk}"
 
     def get_total_price(self):
         return self.price * self.quantity

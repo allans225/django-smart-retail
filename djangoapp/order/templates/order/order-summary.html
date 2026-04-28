@@ -52,13 +52,14 @@
     <aside class="cart-summary-sidebar">
         <section class="block order-summary">
                 <h2>Resumo da Compra</h2>
-                
                 {% include 'product/partial/_summary-details.html' %}
 
-                <button class="btn-primary finish-order-btn">
+            <form action="{% url 'order:create_order' %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn-primary finish-order-btn">
                     Finalizar
                 </button>
-            </section>
+            </form>
 
             <div class="block btn-back">
                 <a href="{% url 'product:cart_detail' %}" class="block btn-back-link">
