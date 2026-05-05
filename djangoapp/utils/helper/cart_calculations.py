@@ -1,15 +1,3 @@
-def get_cart_items_count(cart_session):
-    """Retorna a quantidade total de itens no carrinho."""
-    if not cart_session:
-        return 0
-    # Somamos as quantidades de cada item, garantindo que sejam dicionários válidos com a chave 'qty'.
-    return sum(item['qty'] for item in cart_session.values() if isinstance(item, dict) and 'qty' in item)
-
-def get_item_quant(cart_session, variation_id):
-    """Retorna a quantidade do item no carrinho como inteiro."""
-    # Garante que o valor retornado seja int e que o acesso ao dicionário seja seguro."
-    return int(cart_session.get(str(variation_id), {}).get('qty', 0)) if cart_session else 0
-
 def get_cart_totals(cart_session, variations_queryset):
     """
     Cálculo centralizado para evitar loops múltiplos e chamadas redundantes.
@@ -31,6 +19,7 @@ def get_cart_totals(cart_session, variations_queryset):
         if isinstance(data, dict):
             is_selected = data.get('selected', True) # Assume selecionado por padrão
             item_qty = data.get('qty', 0)
+        # Se data não for um dicionário, tentamos extrair a quantidade diretamente, assumindo que o formato antigo era apenas {variation_id: qty}
         else:
             is_selected = True
             item_qty = int(data) if str(data).isdigit() else 0

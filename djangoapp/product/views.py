@@ -1,12 +1,17 @@
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views import View
+
 from django.http import JsonResponse
+
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
+
 from django.contrib.messages import constants as django_messages
 from django.conf import settings
+
 from utils.helper import cart_calculations as cart_helper
+from cart.service.cart import CartService
 from . import models
 
 class ProductListView(ListView):
@@ -28,33 +33,23 @@ class DetailProduct(DetailView):
     
 class CartDetailView(View):
     def get(self, request, *args, **kwargs):
-        cart_session = request.session.get('cart', {})
-        
-        variation_ids = cart_session.keys()
+        cart = CartService.get_cart_instance(request)
+
+        variation_ids = cart.items.keys()
         variations = models.Variation.objects.filter(
             id__in=variation_ids
-        ).select_related('product')
+        ).select_related('product').order_by('product__name')  # Ordena por nome do produto para exibição mais amigável
 
         cart_items = []
         for variation in variations:
-            vid_str = str(variation.id)
-            item_data = cart_session.get(vid_str, {})
-
-            # Garante que pegamos os dados do dicionário da sessão
-            quantity = item_data.get('qty', 0) if isinstance(item_data, dict) else item_data
-            is_selected = item_data.get('selected', True) if isinstance(item_data, dict) else True
-
-            price_eff = variation.get_price()
-            
+            quantity, is_selected = CartService.data_normalization(cart.items.get(str(variation.id), {}))
             cart_items.append({
                 'variation': variation,
                 'quantity': quantity,
                 'selected': is_selected,  # Adiciona o estado de seleção ao contexto do item
-                'item_subtotal_raw': variation.price * quantity,
-                'item_grand_total': price_eff * quantity,
             })
 
-        totals = cart_helper.get_cart_totals(cart_session, variations)
+        totals = CartService.get_full_calculations(cart, variations)
 
         context = {
             'cart_items': cart_items,
@@ -71,7 +66,8 @@ class AddToCartView(View):
         variation_id = request.POST.get('variation_id')
         if not variation_id:
             return JsonResponse({'status': 'error', 'message': 'ID da variação ausente'}, status=400)
-            
+
+        # Validação de quantidade requerida    
         try:
             quantity = int(request.POST.get('quantity', 1))
         except (ValueError, TypeError):
@@ -87,54 +83,20 @@ class AddToCartView(View):
                 'tags': settings.MESSAGE_TAGS.get(django_messages.ERROR, 'alert-danger')
             }, status=400)
 
-        cart = request.session.get('cart', {})
-        # forçando a chave a ser string para evitar erros de serialização JSON
-        vid_str = str(variation_id)
+        cart = CartService.get_cart_instance(request) # Instancia Classe Cart a partir da sessão
+        cart.add_or_update_item(quantity, variation)  # Add ou atualiza o item no carrinho
 
-        price = float(variation.get_price())  # Garante que o preço seja armazenado como float para JSON
+        CartService.save(request, cart) # Salvando o carrinho atualizado na sessão
 
-        if vid_str in cart:
-            # Se for dicionário, atualiza qty
-            if isinstance(cart[vid_str], dict):
-                # Garante que a quantidade não ultrapasse o estoque disponível
-                new_qty = min(cart[vid_str]['qty'] + quantity, variation.stock)
-                cart[vid_str]['qty'] = new_qty
-                # atualizamos o preço e o total_price no update
-                cart[vid_str]['price'] = price
-                cart[vid_str]['total_price'] = price * new_qty
-            else:
-                # Se for int (formato antigo), converte para dict
-                old_qty = cart[vid_str]
-                new_qty = min(old_qty + quantity, variation.stock)
-                cart[vid_str] = {
-                    'qty': new_qty,
-                    'price': price,
-                    'total_price': price * new_qty,
-                    'selected': True,
-                    'product_name': variation.product.name,
-                    'variation_name': variation.name,
-                }
-        else:
-            cart[vid_str] = {
-                'qty': quantity, 
-                'price': price,
-                'total_price': price * quantity,
-                'selected': True, 
-                'product_name': variation.product.name,
-                'variation_name': variation.name
-            }
-
-        request.session['cart'] = cart
-        request.session.modified = True
-
-        # soma o total de itens
-        total_items_count = cart_helper.get_cart_items_count(cart)
+        # Calcular os totais atualizados para retornar na resposta AJAX
+        variations = models.Variation.objects.filter(id__in=cart.items.keys()) 
+        full_data = CartService.get_full_calculations(cart, variations)
 
         return JsonResponse({
             'status': 'success',
             'message': f'Adicionado: {variation.product.name} ({variation.name})',
             'tags': settings.MESSAGE_TAGS.get(django_messages.SUCCESS, 'alert-success'),
-            'total_items_count': total_items_count,
+            'total_items_count': full_data['total_items_count'],
         })
 
 class RemoveFromCartView(View):
@@ -146,97 +108,52 @@ class RemoveFromCartView(View):
         
         # se não houver ID ou se o ID for a string 'null'
         if not variation_id or variation_id == 'null':
-            return JsonResponse({'status': 'error', 
-                                 'message': 'ID da variação inválido'
-                                 }, status=400)
-
-        cart_session = request.session.get('cart', {})
-        var_id_str = str(variation_id)
-
-        if var_id_str in cart_session:
-            # Remove o item
-            del cart_session[var_id_str]
-            request.session['cart'] = cart_session
-            request.session.modified = True
-
-            # Busca as variações que SOBRARAM para recalcular os totais
-            remaining_ids = cart_session.keys()
-            variations = models.Variation.objects.filter(id__in=remaining_ids)
-            
-            # Helper centralizado realiza os cálculos...
-            totals = cart_helper.get_cart_totals(cart_session, variations)
-
             return JsonResponse({
-                'status': 'success',
-                'message': 'Produto removido do carrinho',
-                **totals
-            })
-        
-        return JsonResponse({'status': 'error', 
-                             'message': 'Item não encontrado no carrinho'
-                             }, status=404)
+                'status': 'error', 
+                'message': 'ID da variação inválido'
+            }, status=400)
+
+        cart = CartService.get_cart_instance(request) # Instancia Classe Cart a partir da sessão
+
+        # Tenta remover o item do carrinho usando o método remove_item da classe Cart, 
+        # que retorna True se o item foi removido com sucesso.
+        try:
+            if cart.remove_item(variation_id):
+                # Salva o carrinho atualizado na sessão do user
+                CartService.save(request, cart)
+
+                # Busca as variações restantes para recalcular os totais
+                remaining_ids = cart.items.keys()
+                # Evita consulta desnecessária ao banco de dados se o carrinho estiver vazio após a remoção
+                variations = models.Variation.objects.filter(id__in=remaining_ids) if remaining_ids else []
+                
+                # Recalcula os totais atualizados para retornar na resposta AJAX
+                totals = CartService.get_full_calculations(cart, variations)
+
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Produto removido do carrinho',
+                    **totals
+                })
+
+            return JsonResponse({'status': 'error','message': 'Produto não encontrado no carrinho'}, status=404)
+
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': 'Message: ' + str(e)}, status=500)
     
 class UpdateItemSelectionCartView(View):
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         # 'scope' define se a ação é em um item ('single'), em todos ('all') ou promocionais ('discounted')
         scope = request.POST.get('scope', 'single')
         is_selected = request.POST.get('selected') == 'true' # Convertendo string para booleano
-        variation_id = request.POST.get('variation_id')  # # 'variation_id' só é relevante quando o scope é 'single'
+        variation_id = request.POST.get('variation_id')      # 'variation_id' só é relevante quando o scope é 'single'
+        
+        cart = CartService.get_cart_instance(request)
+        CartService.update_selection_by_scope(cart, scope, is_selected, variation_id)
+        CartService.save(request, cart)
 
-        cart = request.session.get('cart', {})
-
-        # Obtém as chaves IDs no carrinho e busca todas as variações correspondentes 
-        # em uma única consulta ao banco de dados (evita o problema de N+1 consultas).
-        variation_ids = cart.keys()
-        variations = models.Variation.objects.filter(id__in=variation_ids)
-
-        # Selecionar/Desmarcar (tudo)
-        if scope == 'all':
-            for vid in cart:
-                # Verifica se o item é legado (apenas int) e converte para dict se necessário
-                if not isinstance(cart[vid], dict):
-                    cart[vid] = {'qty': cart[vid], 'selected': is_selected}
-                else:
-                    cart[vid]['selected'] = is_selected
-
-        # Selecionar/Desmarcar apenas itens com PROMOÇÃO
-        elif scope == 'discounted':
-            # Cria um conjunto de IDs que possuem desconto
-            discounted_ids = []
-            for v in variations:
-                if v.promotional_price > 0 and v.promotional_price < v.price:
-                    discounted_ids.append(str(v.id))
-
-            # percorre o carrinho para atualizar TODOS os itens
-            for vid in cart:
-                is_promo = vid in discounted_ids
-                
-                # Regra: Se o filtro é 'discounted' e está sendo ATIVADO (is_selected=True)
-                # Queremos que apenas os promos fiquem True, e os outros fiquem False.
-                if is_selected:
-                    new_state = True if is_promo else False
-                else:
-                    new_state = False if is_promo else cart[vid].get('selected', False)
-
-                if not isinstance(cart[vid], dict):
-                    cart[vid] = {'qty': cart[vid], 'selected': new_state}
-                else:
-                    cart[vid]['selected'] = new_state
-
-        # Selecionar/Desmarcar um ÚNICO item específico
-        elif scope == 'single' and variation_id:
-            vid_str = str(variation_id)
-            if vid_str in cart:
-                if not isinstance(cart[vid_str], dict):
-                    cart[vid_str] = {'qty': cart[vid_str], 'selected': is_selected}
-                else:
-                    cart[vid_str]['selected'] = is_selected
-
-        request.session['cart'] = cart
-        request.session.modified = True
-
-        # Recálculo dos totais
-        totals = cart_helper.get_cart_totals(cart, variations)
+        variations = models.Variation.objects.filter(id__in=cart.items.keys())
+        totals = CartService.get_full_calculations(cart, variations)
 
         return JsonResponse({
             'status': 'success',
@@ -265,18 +182,13 @@ class UpdateItemQuantityCartView(View):
             }, status=400)
 
         # Atualização da Sessão
-        cart = request.session.get('cart', {})
-        if variation_id in cart:
-            if isinstance(cart[variation_id], dict):
-                cart[variation_id]['qty'] = new_qty
-            else:
-                cart[variation_id] = {'qty': new_qty, 'selected': True}
-        
-        request.session['cart'] = cart
-        request.session.modified = True
+        cart = CartService.get_cart_instance(request)
+        if variation_id in cart.items:
+            # Sobrescreve a quantidade do item existente com a nova quantidade
+            cart.add_or_update_item(new_qty, variation, overwrite=True)
 
-        # Recálculo (Helper)
-        variations = models.Variation.objects.filter(id__in=cart.keys())
-        totals = cart_helper.get_cart_totals(cart, variations)
+        CartService.save(request, cart)
+        variations = models.Variation.objects.filter(id__in=cart.items.keys())
+        totals = CartService.get_full_calculations(cart, variations)
 
         return JsonResponse({'status': 'success', **totals})

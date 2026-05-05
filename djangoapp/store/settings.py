@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'product.apps.ProductConfig',
     'account',
     'order',
-
+    'cart',
     # Third-party apps
     'django_summernote',
 ]
