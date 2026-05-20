@@ -13,7 +13,6 @@ def validate_and_sync_cart(cart, db_variations):
     # Cast para list para permitir deletar itens durante a iteração
     for vid, data in list(cart.items()):
         variation = variations_dict.get(vid)
-        print(data) 
         
         # Se a variação não existe no DB
         if not variation:
@@ -59,7 +58,6 @@ def validate_and_sync_cart(cart, db_variations):
         current_price = Decimal(str(variation.get_price()))
         # O preço do item no carrinho (cast para Decimal para comparação precisa)
         session_price = Decimal(str(data.get('price', 0)))
-        print(f"Session: {session_price} | DB: {current_price}")
         # Verifica se o preço do item no carrinho está desatualizado
         if session_price != current_price:
             has_changes = True

@@ -1,87 +1,93 @@
 from django.shortcuts import render, redirect
-from utils.validator import cart as cart_auth
 from django.db import transaction
 
 from django.views import View
-from product.models import Variation, VariationImage
+from product.models import Variation
 from order.models import Order, OrderItem
+from cart.service.cart import CartService
+from utils.mixins import MessageMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from utils.validator.address import get_user_address
 
 from django.contrib import messages
 from utils.helper import cart_calculations as cart_helper
 
-class CheckoutSummaryView(View):
+class CheckoutSummaryView(LoginRequiredMixin, MessageMixin, View):
     template_name = 'order/order-summary.html'
 
-    def get(self, *args, **kwargs):
-        # Proteção de autenticação
-        if not self.request.user.is_authenticated:
-            messages.warning(self.request, "Faça login para finalizar seu pedido.")
-            return redirect('account:auth_page')
-        
+    def get(self, request):
         address = get_user_address(self.request.user)
-
         if not address:
-            messages.warning(self.request, "Adicione um endereço para finalizar seu pedido.")
-            # >> TO DO: Redirecionar para a página de gerenciamento de endereços nas configurações do perfil
+            self.render_message(
+                self.request,
+                message="Adicione um endereço para finalizar seu pedido.",
+                level=messages.WARNING,
+                status=400
+            )
             return redirect('account:auth_page')
+            # >> TO DO: Redirecionar para a página de gerenciamento de endereços nas configurações do perfil
 
-        cart = self.request.session.get('cart')
-
+        cart = CartService.get_cart_instance(self.request)
         # Proteção contra acesso direto sem itens no carrinho
         if not cart:
-            messages.warning(self.request, "Seu carrinho está vazio.")
+            self.render_message(
+                self.request,
+                message="Seu carrinho está vazio.",
+                level=messages.WARNING,
+                status=400
+            )
+            return redirect('product:all')
+
+        selected_item_ids = cart.get_selected_item_ids()
+
+        if not selected_item_ids:
+            self.render_message(
+                request,
+                message="Selecione ao menos um item no carrinho",
+                level=messages.WARNING,
+                status=400
+            )
             return redirect('product:cart_detail')
 
-        cart_variation_ids = list(cart.keys())
-        db_variations = Variation.objects.select_related('product').filter(id__in=cart_variation_ids)
+        db_variations = Variation.objects.select_related('product').filter(id__in=selected_item_ids)
+        cart, notifications = CartService.sync_cart(cart, db_variations)
 
-        # Sincroniza o carrinho com o estoque atual
-        cart, notifications, has_changed = cart_auth.validate_and_sync_cart(cart, db_variations)
-            
+        # Re-filtrar os IDs caso o sync tenha deletado algo por falta de estoque
+        valid_selected_ids = cart.get_selected_item_ids()
+        CartService.save(request, cart)
+
         if notifications:
-            for note in notifications:
-                if note['type'] == 'error':
-                    messages.error(self.request, note['message'])
-                elif note['type'] == 'warning':
-                    messages.warning(self.request, note['message'])
-                elif note['type'] == 'info':
-                    messages.info(self.request, note['message'])
+            for msg in notifications:
+                self.render_message(request, message=msg, level=messages.WARNING, status=400)
 
-        if has_changed:
-            self.request.session.modified = True  # Garante que a sessão seja salva após as alterações
-            return redirect('product:cart_detail')
+            if not valid_selected_ids:
+                self.render_message(
+                    self.request,
+                    message="Não há itens selecionados disponíveis para finalizar o pedido. Verifique o estoque dos seus produtos.",
+                    level=messages.WARNING
+                )
+                return redirect('product:cart_detail')
 
-        if not cart or len(cart) == 0:
-            messages.warning(self.request, "Seu carrinho ficou vazio após as atualizações. Adicione produtos para finalizar seu pedido.")
-            return redirect('product:cart_detail')
-
-        cart_totals = cart_helper.get_cart_totals(cart, db_variations)
+        # Filtrar o QuerySet em memória, evitando mais chamadas ao banco
+        active_variations = [v for v in db_variations if str(v.id) in valid_selected_ids]
 
         # Convertendo o carrinho para uma lista de itens detalhados para renderização no template
-        variations_dict = {str(v.id): v for v in db_variations}
-        cart_items_template = []
-        for vid, data in cart.items():
-            variation = variations_dict.get(str(vid))
-            if variation:
-                cart_items_template.append({
-                    'variation': variation,
-                    'quantity': data.get('qty', 0),
-                    'price': data.get('price', 0),
-                    'total_price': data.get('qty', 0) * data.get('price', 0),
-                })
+        variations_dict = {str(v.id): v for v in active_variations}
+        cart_template = cart.get_selected_items_list(variations_dict)
+
+        # Totais levando em consideração apenas os itens selecionados
+        totals = CartService.get_full_calculations(cart, active_variations)
 
         context = {
             'address': address,
-            'cart': cart,
-            'cart_items': cart_items_template,
-            **cart_totals
+            'cart_items': cart_template,
+            **totals
         }
 
         return render(self.request, self.template_name, context)
-    
+   
 class CreateOrderView(View):
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         # proteção de autenticação
         if not self.request.user.is_authenticated:
             messages.warning(self.request, "Faça login para finalizar seu pedido.")
@@ -100,10 +106,10 @@ class CreateOrderView(View):
         
         # buscando as variações para garantir o preço, estoque atual e as imagens relacionadas 
         # (related_name='images' -> VariationImage.variation)
-        cart_variation_ids = list(cart.keys())
+        cart_ids = list(cart.keys())
         db_variations = Variation.objects.select_related('product') \
             .prefetch_related('images') \
-            .filter(id__in=cart_variation_ids) \
+            .filter(id__in=cart_ids) \
 
         # Recalculando tudo no servidor, garantindo integridade dos dados
         cart_totals = cart_helper.get_cart_totals(cart, db_variations)

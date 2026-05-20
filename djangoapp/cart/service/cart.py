@@ -19,7 +19,12 @@ class CartService:
         """Normaliza os dados do item do carrinho, garantindo que sejam extraídos de forma segura e consistente."""
         qty = data['qty'] if isinstance(data, dict) else int(data)
         selected = data.get('selected', True) if isinstance(data, dict) else True
-        return qty, selected
+        price = Decimal(str(data.get('price', '0.00'))) if isinstance(data, dict) else Decimal('0.00')
+        total_price = Decimal(str(data.get('total_price', '0.00'))) if isinstance(data, dict) else Decimal('0.00')
+        product_name = data.get('product_name', '') if isinstance(data, dict) else ''
+        variation_name = data.get('variation_name', '') if isinstance(data, dict) else ''
+
+        return qty, selected, price, total_price, product_name, variation_name
 
     @classmethod
     def get_cart_items_count(cls, cart_entity):
@@ -30,9 +35,9 @@ class CartService:
         return sum(cls.data_normalization(data)[0] for data in cart_entity.items.values())
 
     @classmethod
-    def get_full_calculations(cls, cart_entity, items_queryset):
+    def get_full_calculations(cls, cart_entity, db_variations):
         """Cálculo centralizado para evitar loops múltiplos e chamadas redundantes. Retorna um dicionário com todos os valores necessários."""
-        items_dict = {str(item.id): item for item in items_queryset}
+        items_dict = {str(item.id): item for item in db_variations}
 
         totals = {
             'selected_items_count': 0,
@@ -45,7 +50,7 @@ class CartService:
             item = items_dict.get(str(variation_id))
             if not item: continue
 
-            qty, selected = cls.data_normalization(data)
+            qty, selected, _, _, _, _ = cls.data_normalization(data)
 
             totals['total_items_count'] += qty # Soma todos os itens da sessão para a badge, selecionados ou não
 
@@ -99,3 +104,48 @@ class CartService:
                     new_state = False if is_promo else current_state
 
                 cart_entity.toggle_selection(item_id=i_id, is_selected=new_state)
+
+    @classmethod
+    def sync_cart(cls, cart_entity, db_variations):
+        db_items_dict = {str(v.id): v for v in db_variations}
+        cart = cart_entity.items
+        changes = [] # lista para capturar mudanças e informar o usuário posteriormente
+
+        # Para cada item no carrinho, verificamos se ele ainda existe no banco de dados e se os dados estão atualizados.
+        for id, data in list(cart.items()):
+            db_item = db_items_dict.get(str(id))
+            if not db_item: # Se o item não existe mais no banco de dados, removemos do carrinho
+                product_name_del = cart[id].get('product_name', 'Produto') if isinstance(cart[id], dict) else 'Produto'
+                changes.append(f"O produto '{product_name_del}' não está mais disponível e foi removido do seu carrinho.")
+                del cart[id]
+                continue
+            
+            # Normalizando dados do item do carrinho para comparação e atualização
+            item_qty, _, _, _, product_name, variation_name = cls.data_normalization(data)
+
+            # Atualizamos os nomes do produto e variação para garantir que estejam sempre sincronizados com o banco de dados.
+            cart[id]['product_name'] = db_item.product.name if product_name != db_item.product.name else product_name
+            cart[id]['variation_name'] = db_item.name if variation_name != db_item.name else variation_name
+
+            # Verificação de estoque: Se a quantidade no carrinho for maior que o estoque disponível, 
+            # ajustamos para o máximo possível ou removemos se estiver esgotado.
+            if db_item.stock < item_qty:
+                if db_item.stock <= 0:
+                    changes.append(f"O produto '{db_item.product.name} - {db_item.name}' está esgotado e foi removido do seu carrinho.")
+                    del cart[id]
+                    continue
+                else:
+                    cart[id]['qty'] = db_item.stock
+                    changes.append(f"A quantidade do produto '{db_item.product.name} - {db_item.name}' foi ajustada para {db_item.stock} devido à disponibilidade em estoque.")
+
+            current_price = Decimal(str(db_item.get_price())) # Preço atualizado do item no banco de dados (com desconto aplicado, se houver)
+            session_price = Decimal(str(data.get('price', '0.00'))) # Preço do item no carrinho (sessão)
+
+            # Se o preço do item no carrinho estiver desatualizado em relação ao banco de dados, 
+            # atualizamos para garantir que o usuário veja o valor correto.
+            if current_price != session_price:
+                cart[id]['price'] = float(current_price)
+                price_fmt = f"R${current_price:.2f}".replace('.', ',')
+                changes.append(f"O preço do produto '{db_item.product.name} - {db_item.name}' foi atualizado para {price_fmt}.")
+            
+        return cart_entity, changes

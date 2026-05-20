@@ -65,7 +65,7 @@ window.showAlert = (message, tags) => {
     }
 
     const alertDiv = document.createElement('div');
-    alertDiv.className = `alert ${tags}`;
+    alertDiv.className = `alert ${finalClass}`;
     alertDiv.setAttribute('role', 'alert');
 
     let iconName = 'msg-info.svg';

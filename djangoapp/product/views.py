@@ -1,16 +1,10 @@
+from django.contrib.messages import constants as django_messages
+from django.shortcuts import get_object_or_404
+from django.shortcuts import render
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views import View
-
-from django.http import JsonResponse
-
-from django.shortcuts import get_object_or_404
-from django.shortcuts import render
-
-from django.contrib.messages import constants as django_messages
-from django.conf import settings
-
-from utils.helper import cart_calculations as cart_helper
+from utils.mixins import MessageMixin
 from cart.service.cart import CartService
 from . import models
 
@@ -21,7 +15,7 @@ class ProductListView(ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        queryset = models.Product.objects.all() # Fetch all products
+        queryset = models.Product.objects.all()
         return queryset
 
 class DetailProduct(DetailView):
@@ -29,20 +23,18 @@ class DetailProduct(DetailView):
     template_name = 'product/detail.html'
     context_object_name = 'product'
     slug_url_kwarg = 'slug'
-
     
 class CartDetailView(View):
     def get(self, request, *args, **kwargs):
         cart = CartService.get_cart_instance(request)
-
         variation_ids = cart.items.keys()
         variations = models.Variation.objects.filter(
             id__in=variation_ids
         ).select_related('product').order_by('product__name')  # Ordena por nome do produto para exibição mais amigável
-
+        
         cart_items = []
         for variation in variations:
-            quantity, is_selected = CartService.data_normalization(cart.items.get(str(variation.id), {}))
+            quantity, is_selected, _, _, _, _ = CartService.data_normalization(cart.items.get(str(variation.id), {}))
             cart_items.append({
                 'variation': variation,
                 'quantity': quantity,
@@ -57,15 +49,25 @@ class CartDetailView(View):
         }
         return render(request, 'product/cart.html', context)
 
-class AddToCartView(View):
+class AddToCartView(View, MessageMixin):
     def post(self, request, *args, **kwargs):
         if request.headers.get('x-requested-with') != 'XMLHttpRequest':
-            return JsonResponse({'status': 'error', 'message': 'Acesso negado'}, status=400)
+            return self.render_message(
+                request,
+                message='Acesso negado',
+                level=django_messages.ERROR,
+                status=400
+            )
 
         # Garante que o ID seja tratado como String para a Sessão
         variation_id = request.POST.get('variation_id')
         if not variation_id:
-            return JsonResponse({'status': 'error', 'message': 'ID da variação ausente'}, status=400)
+            return self.render_message(
+                request,
+                message='ID da variação ausente',
+                level=django_messages.ERROR,
+                status=400
+            )
 
         # Validação de quantidade requerida    
         try:
@@ -77,11 +79,13 @@ class AddToCartView(View):
 
         # Validação de estoque
         if variation.stock < quantity:
-            return JsonResponse({
-                'status': 'error',
-                'message': f'Estoque insuficiente ({variation.stock} disponíveis).',
-                'tags': settings.MESSAGE_TAGS.get(django_messages.ERROR, 'alert-danger')
-            }, status=400)
+            return self.render_message(
+                request,
+                message=f'Estoque insuficiente ({variation.stock} disponíveis).',
+                level=django_messages.ERROR,
+                extra_data={'available_stock': variation.stock},
+                status=400
+            )
 
         cart = CartService.get_cart_instance(request) # Instancia Classe Cart a partir da sessão
         cart.add_or_update_item(quantity, variation)  # Add ou atualiza o item no carrinho
@@ -89,29 +93,37 @@ class AddToCartView(View):
         CartService.save(request, cart) # Salvando o carrinho atualizado na sessão
 
         # Calcular os totais atualizados para retornar na resposta AJAX
-        variations = models.Variation.objects.filter(id__in=cart.items.keys()) 
+        variations = models.Variation.objects.filter(id__in=cart.items.keys())
         full_data = CartService.get_full_calculations(cart, variations)
 
-        return JsonResponse({
-            'status': 'success',
-            'message': f'Adicionado: {variation.product.name} ({variation.name})',
-            'tags': settings.MESSAGE_TAGS.get(django_messages.SUCCESS, 'alert-success'),
-            'total_items_count': full_data['total_items_count'],
-        })
+        return self.render_message(
+            request,
+            message=f'Adicionado: {variation.product.name} ({variation.name})',
+            level=django_messages.SUCCESS,
+            extra_data={'total_items_count': full_data['total_items_count']},
+            status=200
+        )
 
-class RemoveFromCartView(View):
+class RemoveFromCartView(View, MessageMixin):
     def post(self, request, *args, **kwargs):
         if request.headers.get('x-requested-with') != 'XMLHttpRequest':
-            return JsonResponse({'status': 'error', 'message': 'Acesso negado'}, status=400)
-        
+            return self.render_message(
+                request,
+                message='Acesso negado',
+                level=django_messages.ERROR,
+                status=400
+            )
+
         variation_id = request.POST.get('variation_id')
         
         # se não houver ID ou se o ID for a string 'null'
         if not variation_id or variation_id == 'null':
-            return JsonResponse({
-                'status': 'error', 
-                'message': 'ID da variação inválido'
-            }, status=400)
+            return self.render_message(
+                request,
+                message='ID da variação inválido',
+                level=django_messages.ERROR,
+                status=400
+            )
 
         cart = CartService.get_cart_instance(request) # Instancia Classe Cart a partir da sessão
 
@@ -130,18 +142,31 @@ class RemoveFromCartView(View):
                 # Recalcula os totais atualizados para retornar na resposta AJAX
                 totals = CartService.get_full_calculations(cart, variations)
 
-                return JsonResponse({
-                    'status': 'success',
-                    'message': 'Produto removido do carrinho',
-                    **totals
-                })
+                return self.render_message(
+                    request,
+                    message='Produto removido do carrinho',
+                    level=django_messages.SUCCESS,
+                    extra_data=totals,
+                    status=200
+                )
 
-            return JsonResponse({'status': 'error','message': 'Produto não encontrado no carrinho'}, status=404)
-
+            return self.render_message(
+                request,
+                message='Produto não encontrado no carrinho',
+                level=django_messages.ERROR,
+                status=404
+            )
+        
         except Exception as e:
-            return JsonResponse({'status': 'error', 'message': 'Message: ' + str(e)}, status=500)
-    
-class UpdateItemSelectionCartView(View):
+            # return JsonResponse({'status': 'error', 'message': 'Message: ' + str(e)}, status=500)
+            return self.render_message(
+                request,
+                message='Ocorreu um erro ao remover o produto: ' + str(e),
+                level=django_messages.ERROR,
+                status=500
+            )    
+
+class UpdateItemSelectionCartView(View, MessageMixin):
     def post(self, request):
         # 'scope' define se a ação é em um item ('single'), em todos ('all') ou promocionais ('discounted')
         scope = request.POST.get('scope', 'single')
@@ -155,31 +180,35 @@ class UpdateItemSelectionCartView(View):
         variations = models.Variation.objects.filter(id__in=cart.items.keys())
         totals = CartService.get_full_calculations(cart, variations)
 
-        return JsonResponse({
-            'status': 'success',
-            'selected_items_count': totals['selected_items_count'],
-            'cart_subtotal': totals['cart_subtotal'],
-            'total_discount': totals['total_discount'],
-            'total_discount_percent': totals['total_discount_percent'],
-            'grand_total': totals['grand_total'],
-            'total_items_count': totals['total_items_count'],
-        })
+        return self.render_message(
+            request,
+            level=django_messages.SUCCESS,
+            extra_data=totals,
+            status=200
+        )
 
-class UpdateItemQuantityCartView(View):
+class UpdateItemQuantityCartView(View, MessageMixin):
     def post(self, request):
         variation_id = request.POST.get('variation_id')
         try:
             new_qty = int(request.POST.get('new_qty', 1))
         except ValueError:
-            return JsonResponse({'status': 'error', 'message': 'Quantidade inválida'}, status=400)
+            return self.render_message(
+                request,
+                message='Quantidade inválida',
+                level=django_messages.ERROR,
+                status=400
+            )
 
         # Validação de Estoque
         variation = get_object_or_404(models.Variation, id=variation_id)
         if new_qty > variation.stock:
-            return JsonResponse({
-                'status': 'error', 
-                'message': f'Estoque insuficiente ({variation.stock} disponíveis)'
-            }, status=400)
+            return self.render_message(
+                request,
+                message=f'Estoque insuficiente ({variation.stock} disponíveis)',
+                level=django_messages.ERROR,
+                status=400
+            )
 
         # Atualização da Sessão
         cart = CartService.get_cart_instance(request)
@@ -191,4 +220,9 @@ class UpdateItemQuantityCartView(View):
         variations = models.Variation.objects.filter(id__in=cart.items.keys())
         totals = CartService.get_full_calculations(cart, variations)
 
-        return JsonResponse({'status': 'success', **totals})
+        return self.render_message(
+            request,
+            level=django_messages.SUCCESS,
+            extra_data=totals,
+            status=200
+        )

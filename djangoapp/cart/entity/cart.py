@@ -10,7 +10,7 @@ class Cart:
     def to_dict(self):
         """ Converte o carrinho para um formato dicionário para armazenamento na sessão. """
         return self._items
-
+    
     def remove_item(self, item_id):
         """ Remove um item do carrinho com base no ID da variação. Retorna True se o item foi removido """
         id_str = str(item_id)
@@ -71,3 +71,24 @@ class Cart:
             self._items[id_str] = {'qtd': self._items[id_str], 'selected': state}
         else:
             self._items[id_str]['selected'] = state
+
+    def get_selected_items_list(self, variations_dict):
+        """ Recebe um dicionário de Variations e retorna uma lista de dicts para templates """
+        items = []
+        for vid in self.get_selected_item_ids():
+            data = self.items.get(vid)
+            item = variations_dict.get(str(vid))
+
+            if item and data:
+                items.append({
+                    'variation': item,
+                    'quantity': data['qty'],
+                    'price': data['price'],
+                    'total_price': data['qty'] * data['price'],
+                })
+
+        return items
+
+    def get_selected_item_ids(self):
+        """ Retorna ids de itens no carrinho que foram selecionados para a compra """
+        return [id for id, data in self.items.items() if data.get('selected')]
