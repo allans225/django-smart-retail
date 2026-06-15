@@ -114,7 +114,7 @@ class CartService:
         # Para cada item no carrinho, verificamos se ele ainda existe no banco de dados e se os dados estão atualizados.
         for id, data in list(cart.items()):
             db_item = db_items_dict.get(str(id))
-            if not db_item: # Se o item não existe mais no banco de dados, removemos do carrinho
+            if not db_item: # Se o item não existe mais ou está esgotado, removemos do carrinho e notificamos o usuário.
                 product_name_del = cart[id].get('product_name', 'Produto') if isinstance(cart[id], dict) else 'Produto'
                 changes.append(f"O produto '{product_name_del}' não está mais disponível e foi removido do seu carrinho.")
                 del cart[id]

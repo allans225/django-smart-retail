@@ -19,6 +19,11 @@ class Cart:
             return True
         return False
 
+    def remove_selected_items(self):
+        """ Remove todos os itens que estão selecionados para compra """
+        for vid in self.get_selected_item_ids():
+            self.remove_item(vid)
+
     def add_or_update_item(self, required_quantity, item, overwrite=False):
         """
         Adiciona ou atualiza (substitui) um item no carrinho, respeitando o estoque disponível.
