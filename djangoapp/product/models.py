@@ -92,7 +92,7 @@ class Variation(models.Model):
     promotional_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Preço Promocional")
     stock = models.PositiveIntegerField(default=1, verbose_name="Estoque")
     sku = models.CharField(
-        max_length=50, 
+        max_length=50,
         unique=True,
         blank=True,
         null=True,
