@@ -8,7 +8,7 @@ class Cart:
         return self._items
 
     def to_dict(self):
-        """ Converte o carrinho para um formato dicionário para armazenamento na sessão. """
+        """ Retorna uma cópia do dicionário de itens do carrinho. """
         return self._items
     
     def remove_item(self, item_id):
@@ -73,7 +73,7 @@ class Cart:
     def _update_item_selection(self, id_str, state):
         """ Método auxiliar para garantir a normalização durante o update de seleção """
         if not isinstance(self._items[id_str], dict):
-            self._items[id_str] = {'qtd': self._items[id_str], 'selected': state}
+            self._items[id_str] = {'qty': self._items[id_str], 'selected': state}
         else:
             self._items[id_str]['selected'] = state
 
