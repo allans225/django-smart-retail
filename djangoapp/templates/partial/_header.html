@@ -22,14 +22,45 @@
         <div class="nav-actions">
             <a href="{% url 'product:cart_detail' %}" class="cart-icon">
                 <img src="{% static 'assets/img/icons/cart.svg' %}" alt="Cart Icon" class="cart-img">
-                <span id="cart-badge" class="badge" 
+                <span id="cart-badge" class="badge"
                     style="display: {% if cart_total_items and cart_total_items > 0 %}flex{% else %}none{% endif %};">
                     {{ cart_total_items|default:"" }}
                 </span>
             </a>
-            <a href="#" class="user-icon">
-                <img src="{% static 'assets/img/icons/user.svg' %}" alt="User Icon" class="user-img">
-            </a>
+            {% if user.is_authenticated %}
+                <div class="profile-menu-container">
+                    <a href="#" class="user-icon" id="profile-menu-trigger" aria-label="Abrir menu de perfil">
+                        <img src="{% static 'assets/img/icons/user.svg' %}" alt="User Icon" class="user-img">
+                    </a>
+
+                    <div class="dropdown-menu" id="profile-dropdown">
+                        <div class="dropdown-header">
+                            <div class="avatar-circle">
+                                <img src="{% static 'assets/img/icons/user.svg' %}" alt="User Avatar" class="dropdown-avatar-img">
+                            </div>
+                            <div class="user-info">
+                                <span class="user-name">{{ user.first_name}} {{ user.last_name|truncatechars:25 }}</span>
+                                <span class="user-email">{{ user.email|truncatechars:30 }}</span>
+                            </div>
+                        </div>
+
+                        <hr class="dropdown-divider">
+
+                        <ul class="dropdown-links">
+                            <li><a href="#" class="dropdown-link">Minhas Compras</a></li>
+                            <li><a href="#" class="dropdown-link">Configurações da Conta</a></li>
+                            <li><a href="{% url 'account:logout' %}" class="dropdown-link">Sair</a></li>
+                        </ul>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{% url 'account:auth_page' %}" class="login-icon">
+                    <img src="{% static 'assets/img/icons/login.svg' %}" alt="Login Icon" class="login-img">
+                </a>
+            {% endif %}
         </div>
     </nav>
 </header>
+{% block scripts %}
+    <script type="module" src="{% static 'assets/js/pages/header/menu.js' %}"></script>
+{% endblock %}

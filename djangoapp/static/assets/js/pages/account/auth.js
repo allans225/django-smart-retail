@@ -1,6 +1,9 @@
 import { AuthAPI } from '../../modules/api/auth.js'
 import { CepAPI } from '../../modules/api/zipcode.js';
 
+// Arquivo JS para lidar com a lógica de autenticação (login e registro)
+// e preenchimento automático de dados de endereço do usuário via CEP.
+
 const FormsUI = {
     visualChargingFeedback(element, msg = null) {
         if (msg) {
