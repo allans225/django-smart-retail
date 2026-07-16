@@ -1,11 +1,12 @@
 {% load static %}
 
 <div id="address-section" class="address-collapsible">
-    <div class="input-row">
+    <div class="input-group">
         <input type="text" name="zip_code" placeholder="CEP" class="auth-input">
-        <input type="text" name="number" placeholder="Número" class="auth-input">
+        <span class="error-message" id="error-zip_code"></span>
     </div>
 
+    <input type="text" name="number" placeholder="Número" class="auth-input">
     <input type="text" name="street" placeholder="Rua" class="auth-input">
     <input type="text" name="neighborhood" placeholder="Bairro" class="auth-input">
     <input type="text" name="city" placeholder="Cidade" class="auth-input">

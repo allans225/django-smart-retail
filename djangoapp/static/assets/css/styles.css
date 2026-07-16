@@ -142,12 +142,22 @@
     border: 1px solid var(--cl-offwhite);
     z-index: 1000;
     padding: 12px 4px;
-    display: none;
+    /* animação para suavizar menu */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(5px); /* começa 5px abaixo */
+    /* animar duração e curva de velocidade */
+    transition:
+        opacity 0.25s ease-out,
+        transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+        visibility 0.25s;
 }
 
 /* Ativado via JS: adiciona a classe "active" para mostrar o menu */
 .dropdown-menu.active {
-    display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0); /* voltar a posição original suavemente */
 }
 
 .dropdown-header {
@@ -182,12 +192,13 @@
 
 .user-name {
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: 0.90rem;
     color: var(--cl-ff-title);
 }
 
 .user-email {
-    font-size: 0.80rem;
+    font-weight: 300;
+    font-size: 0.75rem;
     color: var(--cl-ff-text);
 }
 
@@ -197,12 +208,13 @@
 }
 
 .dropdown-links a {
+    line-height: 2;
     text-decoration: none;
     color: var(--cl-ff-text);
     font-size: 0.85rem;
     font-weight: 500;
     display: block;
-    padding: 2px 0;
+    padding: 0 8px;
     transition: color 0.2s;
 }
 
@@ -1135,7 +1147,6 @@ select.auth-input {
     visibility: visible !important;
     opacity: 1 !important;
     max-height: none !important; /* Remove a restrição de altura */
-    min-height: 10px; /* Garante um espaço mínimo */
 }
 
 .auth-input.input-error {
