@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import IntegrityError
 from django.db import transaction
 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from .models import Profile
 from .models import Address
@@ -12,10 +13,10 @@ from .models import Address
 from django.views.generic import TemplateView
 from django.http import JsonResponse
 from django.views import View
-from .forms import LoginForm, RegisterForm
+from .forms import LoginForm, RegisterForm, UserBasicDataUpdateForm
 
 from django.contrib.auth import authenticate, login
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.contrib.auth import logout
 
 class AuthView(TemplateView):
@@ -86,7 +87,7 @@ class LoginView(View):
         
         # Bad request - se o form não for válido (ex: e-mail mal digitado)
         return JsonResponse({'status': 'error', 'errors': form.errors.get_json_data()}, status=400)
-    
+
 class RegisterView(View):
     def post(self, request):
         form = RegisterForm(request.POST)
@@ -158,3 +159,56 @@ class RegisterView(View):
             'message': 'Verifique os dados informados.',
             'errors': form.errors.get_json_data()
         }, status=400)
+
+class SetupPanelView(LoginRequiredMixin, TemplateView):
+    template_name = 'account/setup-panel.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        
+        initial_data = {
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'birth_date': user.profile.birth_date if hasattr(user, 'profile') else '',
+            'biography': user.profile.bio if hasattr(user, 'profile') else '',
+        }
+        
+        context['basic_data_form'] = UserBasicDataUpdateForm(initial=initial_data)
+        return context
+    
+class UpdateBasicDataView(LoginRequiredMixin, View):
+    
+    def post(self, request):
+        form = UserBasicDataUpdateForm(request.POST)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    user = request.user
+                    user.first_name = form.cleaned_data.get('first_name')
+                    user.last_name = form.cleaned_data.get('last_name')
+                    user.save()
+
+                    profile, created = Profile.objects.get_or_create(user=user)
+                    profile.birth_date = form.cleaned_data.get('birth_date')
+                    profile.bio = form.cleaned_data.get('biography')
+                    profile.save()
+
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Perfil atualizado com sucesso!'
+                })
+                
+            except Exception as e:
+                # erro do banco de dados ou interno
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'Erro ao salvar os dados: {str(e)}'
+                }, status=500)
+        else:
+            # formulário inválido, retorna os erros para o JS exibir
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Verifique os dados informados',
+                'errors': form.errors.get_json_data() # envia os erros de validação
+            }, status=400)

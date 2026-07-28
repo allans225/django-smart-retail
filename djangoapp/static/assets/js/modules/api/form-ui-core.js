@@ -18,7 +18,7 @@ const FormsUI = {
             span.innerText = '';
             span.style.display = 'none';
         });
-        form.querySelectorAll('.auth-input').forEach(input => input.classList.remove('input-error'));
+        form.querySelectorAll('.form-input').forEach(input => input.classList.remove('input-error'));
     },
 
     // Verifica se existem erros específicos por campo vindos do servidor

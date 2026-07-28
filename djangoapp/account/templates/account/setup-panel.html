@@ -1,0 +1,42 @@
+{% extends 'static/base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="profile-settings-container">
+    <aside class="block avatar-setup-block">
+        <div class="avatar-circle">
+            <a href="#" aria-label="Alterar Foto de Perfil">
+                <img src="{% static 'assets/img/icons/user.svg' %}" alt="User Avatar">
+            </a>
+        </div>
+    </aside><!-- Foto de Perfil do User -->
+
+    <header class="block header-setup-block">
+        <h2>Dados do Perfil</h2>
+        <p>Edite ou Adicione novas Informações</p>
+    </header><!-- Cabeçalho do Painel-->
+
+    <nav class="block menu-setup-block">
+        <ul class="settings-menu">
+            <li class="active" data-target="basicdata-form">
+                <a href="#">Perfil</a>
+            </li>
+            <li data-target="address-form">
+                <a href="#">Endereços</a>
+            </li>
+            <li data-target="securitydata-form">
+                <a href="#">Segurança da Conta</a>
+            </li>
+        </ul>
+    </nav><!-- Menu Lateral -->
+
+    <section class="block form-setup-block">
+        {% include 'account/_partials/form/setup/_profile-basic-data.html' %}
+        {% include 'account/_partials/form/setup/_profile-address-data.html' %}
+        {% include 'account/_partials/form/setup/_profile-security-data.html' %}
+    </section><!-- Formulário -->
+</main>
+{% endblock %}
+{% block scripts %}
+    <script type="module" src="{% static 'assets/js/pages/account/setup-form.js' %}"></script>
+{% endblock  %}

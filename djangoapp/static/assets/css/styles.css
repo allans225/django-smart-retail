@@ -219,8 +219,9 @@
 }
 
 .dropdown-links a:hover {
-    background-color: var(--cl-blue-light);
-    color: var(--cl-ff-title);
+    background-color: hsl(0, 0%, 20%);
+    color: var(--cl-light-bg);
+    border-radius: 4px;
 }
 
 /* footer */
@@ -966,7 +967,7 @@ input:checked + .custom-checkbox::after {
     font-size: 14px;
 }
 
-/* account: forms - login & register */
+/* account: forms */
 
 .auth-page {
     min-height: 100vh;
@@ -984,9 +985,9 @@ input:checked + .custom-checkbox::after {
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 
-.auth-input {
+.form-input {
     width: 100%;
-    background-color: #d9d9d9;
+    background-color: #eeeded;
     border: none;
     padding: 12px 15px;
     border-radius: 5px;
@@ -1105,7 +1106,7 @@ input:checked + .custom-checkbox::after {
     min-width: 0;
 }
 
-select.auth-input {
+select.form-input {
     appearance: none;
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
@@ -1149,7 +1150,7 @@ select.auth-input {
     max-height: none !important; /* Remove a restrição de altura */
 }
 
-.auth-input.input-error {
+.form-input.input-error {
     border-color: var(--cl-danger) !important;
     background-color: #fffafa;
 }
@@ -1208,4 +1209,131 @@ select.auth-input {
 /* Transição para o ícone da seta */
 #arrow-icon {
     transition: transform 0.3s ease-in-out;
+}
+
+/* User Setup Panel */
+.profile-settings-container {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 5px;
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 5px 10px; 
+}
+
+.avatar-setup-block {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.avatar-setup-block .avatar-circle {
+    width: 110px;
+    height: 110px;
+    border: 1px solid rgb(71, 71, 71);
+}
+
+.avatar-setup-block .avatar-circle a > img{
+    width: 45px;
+    height: 45px;
+}
+
+.header-setup-block {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.header-setup-block h2 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+.header-setup-block p {
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.menu-setup-block .settings-menu li {
+    margin-bottom: 5px;
+}
+
+.menu-setup-block .settings-menu a {
+    display: block;
+    padding: 4px 8px;
+    text-decoration: none;
+    color: var(--cl-ff-title);
+    font-size: 0.8rem;
+    border-radius: 4px;
+    transition: 
+        background 0.2s, 
+        color 0.2s;
+}
+
+.menu-setup-block .settings-menu li a:hover {
+    background: hsl(0, 0%, 20%);
+    color: white;
+    border-radius: 4px;
+}
+
+.menu-setup-block .settings-menu li.active a {
+    background: black;
+    color: white;
+    font-weight: 600;
+}
+
+.form-section {
+    display: flex;
+    flex-direction: column;
+    padding: 5px 20px;
+}
+
+.form-section h3 {
+    font-size: 1rem;
+    margin: 10px 2px;
+}
+
+.form-section > textarea::placeholder {
+    padding: 15px;
+    color: #666;
+}
+
+.short-input {
+    width: 30%;
+}
+
+.section-divider {
+    border: 0;
+    border-top: 3px solid #eee;
+    margin: 20px 0;
+}
+
+.config-textarea {
+    resize: vertical;
+    padding: 15px;
+    min-height: 130px;
+    background-color: #eeeded;
+    border: 0;
+    border-radius: 5px;
+}
+
+.btn-save {
+    background-color: #000;
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    align-self: flex-start;
+    margin-top: 25px;
+    transition: opacity 0.2s;
+}
+
+.btn-save:hover {
+    opacity: 0.9;
 }

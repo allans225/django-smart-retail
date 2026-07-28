@@ -1,0 +1,47 @@
+<form id="basicdata-form" method="POST" data-url="{% url 'account:upt_basic_data' %}">
+    {% csrf_token %}
+    <div class="form-section">
+        <h3>Dados Básicos</h3>
+        <div class="input-group">
+            <input
+                type="text"
+                name="first_name"
+                placeholder="Nome"
+                class="form-input" 
+                value="{{ basic_data_form.first_name.value|default_if_none:'' }}"
+            >
+            <span class="error-message" id="error-first_name"></span>
+        </div>
+        <div class="input-group">
+            <input 
+                type="text" 
+                name="last_name" 
+                placeholder="Sobrenome" 
+                class="form-input"
+                value="{{ basic_data_form.last_name.value|default_if_none:'' }}"
+            >
+            <span class="error-message" id="error-last_name"></span>
+        </div>
+        <div class="input-group">
+            <input 
+                type="date"
+                name="birth_date" 
+                placeholder="Data de Aniversário"
+                class="form-input short-input"
+                value="{{ basic_data_form.birth_date.value|date:'Y-m-d' }}"
+            >
+            <span class="error-message" id="error-birth_date"></span>
+        </div>
+    </div>
+    <hr class="section-divider">
+    <div class="form-section">
+        <h3>Biografia</h3>
+        <textarea 
+            name="biography"
+            placeholder="Diga-nos sobre a sua história." 
+            class="config-input config-textarea">
+            {{ basic_data_form.biography.value|default_if_none:'' }}
+        </textarea>
+        <button type="submit" class="btn-save">Salvar</button>
+    </div>
+</form>

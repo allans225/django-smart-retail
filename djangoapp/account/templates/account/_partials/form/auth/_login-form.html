@@ -1,8 +1,8 @@
 {% load static %}
 <form id="login-form" method="POST" data-url="{% url 'account:login' %}">
     {% csrf_token %}
-    <input class="auth-input" type="email" name="email" placeholder="E-mail">
-    <input class="auth-input" type="password" name="password" placeholder="Senha">
+    <input class="form-input" type="email" name="email" placeholder="E-mail">
+    <input class="form-input" type="password" name="password" placeholder="Senha">
     
     <div class="login-footer">
         <label class="remember-me">

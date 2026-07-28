@@ -15,14 +15,11 @@ class BasicAuthData(forms.Form):
     )
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'auth-input', 'placeholder': 'Senha'}))
 
-class LoginForm(BasicAuthData):
-    remember = forms.BooleanField(required=False)
-
-class RegisterForm(BasicAuthData):
+class BaseUserDataForm(forms.Form):
     first_name = forms.CharField(
         validators=[
             validate_no_special_chars,
-            MinLengthValidator(2, message="O nome deve ter pelo menos 2 caracteres"),
+            MinLengthValidator(1, message="O nome deve ter pelo menos 1 caracteres"),
             MaxLengthValidator(30, message="O nome deve ter menos de 30 caracteres")
         ],
         widget=forms.TextInput(attrs={'class': 'auth-input', 'placeholder': 'Nome'})
@@ -30,11 +27,28 @@ class RegisterForm(BasicAuthData):
     last_name = forms.CharField(
         validators=[
             validate_no_special_chars,
-            MinLengthValidator(2, message="O sobrenome deve ter pelo menos 2 caracteres"),
+            MinLengthValidator(1, message="O sobrenome deve ter pelo menos 1 caracteres"),
             MaxLengthValidator(30, message="O sobrenome deve ter menos de 30 caracteres")
         ],
         widget=forms.TextInput(attrs={'class': 'auth-input', 'placeholder': 'Sobrenome'})
     )
+    birth_date = forms.CharField(widget=forms.TextInput(attrs={'class': 'auth-input', 'placeholder': 'Data de Aniversário'}))
+
+    def clean_birth_date(self):
+        date = self.cleaned_data.get('birth_date')
+
+        if not date:
+            raise forms.ValidationError("A data de nascimento é obrigatória.")
+        try:
+            # Converte o formato yyyy-mm-dd para um objeto date
+            return datetime.strptime(date, "%Y-%m-%d").date()
+        except ValueError:
+            raise forms.ValidationError("Formato de data inválido")
+
+class LoginForm(BasicAuthData):
+    remember = forms.BooleanField(required=False)
+
+class RegisterForm(BasicAuthData, BaseUserDataForm):
     username = forms.CharField(
         validators=[
             MinLengthValidator(2, message="O nome de usuário deve ter pelo menos 2 caracteres"),
@@ -42,7 +56,6 @@ class RegisterForm(BasicAuthData):
         ],
         widget=forms.TextInput(attrs={'class': 'auth-input', 'placeholder': 'Nome de Usuário'})
     )
-    birth_date = forms.CharField(widget=forms.TextInput(attrs={'class': 'auth-input', 'placeholder': 'Data de Aniversário'}))
     confirm_passw = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'auth-input', 'placeholder': 'Confirmar Senha'}))
 
     # campos de endereço são OPCIONAIS no formulário de registro de usuário.
@@ -87,23 +100,12 @@ class RegisterForm(BasicAuthData):
             except forms.ValidationError as e:
                 raise forms.ValidationError(e.messages)
         return password
-    
+
     def clean_username(self):
         username = self.cleaned_data.get('username')
         if User.objects.filter(username=username).exists():
             raise forms.ValidationError("Nome de usuário já cadastrado.")
         return username
-
-    def clean_birth_date(self):
-        date = self.cleaned_data.get('birth_date')
-
-        if not date:
-            raise forms.ValidationError("A data de nascimento é obrigatória.")
-        try:
-            # Converte o formato yyyy-mm-dd para um objeto date
-            return datetime.strptime(date, "%Y-%m-%d").date()
-        except ValueError:
-            raise forms.ValidationError("Formato de data inválido")
         
     def clean_zip_code(self):
         cep = self.cleaned_data.get('zip_code')
@@ -114,3 +116,14 @@ class RegisterForm(BasicAuthData):
         if not look_up_cep(cep):
             raise forms.ValidationError("CEP inválido ou não encontrado.")
         return cep
+
+class UserBasicDataUpdateForm(BaseUserDataForm):
+    biography = forms.CharField(
+        required=False,
+        max_length=564,
+        widget=forms.Textarea(attrs={
+            'placeholder': 'Diga-nos sobre a sua história.',
+            'rows': 4,
+            'maxlength': '564' 
+        })
+    )
