@@ -116,9 +116,6 @@ window.changeQty = (steps) =>{
 
     if (newVal >= 1 && newVal <= maxStock) {
         qtyInput.value = newVal;
-    } else if (newVal > maxStock) {
-        // Usa o seu showAlert que já está no escopo global/acessível
-        showAlert(`Apenas ${maxStock} unidades disponíveis em estoque.`, 'alert-info');
     }
 };
 

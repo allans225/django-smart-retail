@@ -1,0 +1,69 @@
+/* Order Summary */
+.order-summary-container {
+    display: grid;
+    max-width: var(--max-header-width);
+    /* Define 2 colunas: a 1ª flexível, a 2ª com 350px */
+    grid-template-columns: 1fr 350px; 
+    gap: 30px;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.order-main {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 850px) {
+    .order-summary-container {
+        grid-template-columns: 1fr; /* Coluna única em telas menores */
+    }
+}
+
+/* Sidebar de Resumo - na page cart */
+
+.order-summary {
+    margin-bottom: 0.5rem;
+}
+
+.order-summary h2 {
+    font-size: 1.2rem;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.summary-details {
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.summary-line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-family: var(--ft-menu);
+}
+.summary-line .label {
+    font-size: 0.95rem;
+    color: var(--cl-ff-text);
+    font-weight: 400;
+}
+
+.summary-divider {
+    border: 1px solid var(--cl-light-bg);
+}
+
+.summary-line.total{
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-top: 10px;
+}
+
+.summary-line.total .label {
+    font-size: 1.2rem;
+}
+
+.text-red { color: var(--cl-red); }
+.text-green { color: var(--cl-green); }

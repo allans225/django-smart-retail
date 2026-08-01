@@ -1,0 +1,77 @@
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-footer {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+.remember-me {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #666;
+    user-select: none;
+    position: relative;
+}
+
+/* Ajuste na estrutura da footer para alinhar à direita */
+.login-footer {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.toggle-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--cl-blue);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: transform 0.3s;
+}
+
+.toggle-link img {
+    height: auto;
+    display: block;
+}
+
+.toggle-link:hover img {
+    transform: translateX(2px);
+}
+
+.expand-trigger {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+/* Lógica de Expansão suave do Endereço */
+.address-collapsible {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.5s ease-in-out, opacity 0.3s ease;
+}
+
+.address-collapsible.open {
+    max-height: 1000px; /* Valor alto o suficiente para os campos */
+    opacity: 1;
+    margin-top: 10px;
+}
+
+/* Transição para o ícone da seta */
+#arrow-icon {
+    transition: transform 0.3s ease-in-out;
+}

@@ -146,7 +146,7 @@ const CartActions = {
 
     async updateItemQuantity(input, steps) {
         const currentVal = parseInt(input.value) || 1;
-        const maxStock = parseInt(input.max) || 1;
+        const maxStock = parseInt(input.max) || 0;
         const variationId = input.dataset.id;
         const newVal = currentVal + steps;
 

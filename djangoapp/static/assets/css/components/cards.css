@@ -1,0 +1,91 @@
+/* Estilo Base dos Blocos */
+.block {
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border-radius: 5px;
+    padding: 15px;
+}
+
+.center-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+    width: 100vw;
+    min-height: 60vh;
+    
+    text-align: center;
+    margin: 0 auto;
+    
+    /* Previne que scroll horizontal apareça por causa do 100vw */
+    box-sizing: border-box; 
+}
+
+/* Detalhes Internos: Galeria */
+.side-thumbnails {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.side-thumbnails img:hover {
+    border: 2px solid var(--cl-green);
+    opacity: 0.8;
+}
+
+.summary-card {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.summary-card h3 {
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.product-card {
+    background-color: white;
+    border-radius: 5px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+}
+
+.cart-item-card {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 0.5rem;
+    align-items: center;
+    position: relative;
+}
+
+.auth-card {
+    background: #ffffff;
+    padding: 30px 45px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+/* Controle de visibilidade dos Cards */
+.auth-card.hidden {
+    display: none;
+}

@@ -1,0 +1,91 @@
+.product-grid-container {
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.grid-wrapper {
+    display: grid;
+    /* Define colunas responsivas: mínimo 250px, máximo 1fr */
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 25px;
+    width: 100%;
+    max-width: 1200px; /* Impede que os itens estiquem demais em monitores 4K */
+}
+
+.product-image-placeholder {
+    background-color: var(--cl-offwhite);
+    width: 100%;
+    aspect-ratio: 1 / 1; /* Mantém o card quadrado independente da imagem */
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.product-image-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Textos e Preços - card-item */
+.product-title {
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--cl-ff-title);
+    margin-bottom: 8px;
+}
+
+.product-description {
+    font-family: var(--font-main);
+    font-weight: 400;
+    font-size: 0.85rem;
+    color: var(--cl-ff-text);
+    line-height: 1.4;
+    margin-bottom: 15px;
+}
+
+.product-price-row {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+}
+
+.price-current {
+    font-family: var(--font-main);
+    color: var(--cl-green);
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.price-old {
+    font-family: var(--font-main);
+    color: var(--cl-ff-text);
+    font-size: 1rem;
+    position: relative;
+    text-decoration: none;
+}
+
+.price-old::after {
+    content: "";
+    position: absolute;
+    left: -5px;
+    right: -5px;
+    top: 50%;
+    height: 2px;
+    background-color: black;
+}
+
+.product-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.product-card:hover .product-title {
+    transition: color 0.2s ease;
+    color: var(--cl-blue);
+}

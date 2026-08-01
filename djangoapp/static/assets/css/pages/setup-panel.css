@@ -1,0 +1,79 @@
+/* User Setup Panel */
+.profile-settings-container {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 5px;
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 5px 10px; 
+}
+
+.avatar-setup-block {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.avatar-setup-block .avatar-circle {
+    width: 110px;
+    height: 110px;
+    border: 1px solid rgb(71, 71, 71);
+}
+
+.avatar-setup-block .avatar-circle a > img{
+    width: 45px;
+    height: 45px;
+}
+
+.header-setup-block {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.header-setup-block h2 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+.header-setup-block p {
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.menu-setup-block .settings-menu li {
+    margin-bottom: 5px;
+}
+
+.menu-setup-block .settings-menu a {
+    display: block;
+    padding: 4px 8px;
+    text-decoration: none;
+    color: var(--cl-ff-title);
+    font-size: 0.8rem;
+    border-radius: 4px;
+    transition: 
+        background 0.2s, 
+        color 0.2s;
+}
+
+.menu-setup-block .settings-menu li a:hover {
+    background: hsl(0, 0%, 20%);
+    color: white;
+    border-radius: 4px;
+}
+
+.menu-setup-block .settings-menu li.active a {
+    background: black;
+    color: white;
+    font-weight: 600;
+}
+
+.section-divider {
+    border: 0;
+    border-top: 3px solid #eee;
+    margin: 20px 0;
+}

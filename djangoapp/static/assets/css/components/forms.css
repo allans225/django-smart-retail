@@ -1,0 +1,179 @@
+.search-container form {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+}
+
+.form-section {
+    display: flex;
+    flex-direction: column;
+    padding: 5px 20px;
+}
+
+.form-section h3 {
+    font-size: 1rem;
+    margin: 10px 2px;
+}
+
+.form-section > textarea::placeholder {
+    padding: 15px;
+    color: #666;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 45px 10px 20px;
+    border-radius: 25px;
+    border: none;
+    background-color: var(--cl-offwhite);
+    font-family: var(--font-menu);
+    outline: none;
+}
+
+
+.item-qty-input {
+    width: 50px;
+    text-align: center;
+    border: none;
+    background: transparent;
+    font-family: var(--ft-main);
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--cl-ff-title);
+    appearance: textfield;
+    -moz-appearance: textfield; /* Remove setas no Firefox */
+}
+
+/* Remove setas no Chrome/Safari */
+.item-qty-input::-webkit-outer-spin-button,
+.item-qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Reutilização e customização do Checkbox */
+input[type="checkbox"] { display: none; }
+.custom-checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    display: inline-block;
+    position: relative;
+    background: var(--cl-offwhite);
+}
+
+input:checked + .custom-checkbox {
+    background: var(--cl-green);
+    border-color: var(--cl-green);
+}
+
+input:checked + .custom-checkbox::after {
+    content: '✓';
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+}
+
+.form-input {
+    width: 100%;
+    background-color: #eeeded;
+    border: none;
+    padding: 12px 15px;
+    border-radius: 5px;
+    margin-bottom: 18px;
+    font-size: 1rem;
+    color: #333;
+}
+
+.remember-me input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.remember-me:hover input ~ .custom-check {
+    background-color: #ccc;
+}
+
+.remember-me input:checked ~ .custom-check {
+    background-color: #000;
+}
+.remember-me input:checked ~ .custom-check:after {
+    display: block;
+}
+
+.input-row { display: flex; gap: 10px; }
+
+.input-row > * {
+    flex: 1 1 0%;
+    min-width: 0;
+}
+
+select.form-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+}
+
+/* Container para agrupar input + erro */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    transition: margin-bottom 0.2s ease;
+}
+
+/* Se o grupo contiver um erro com texto, aumentamos o espaçamento inferior */
+.input-group:has(.error-message:not(:empty)) {
+    margin-bottom: 1.2rem;
+}
+
+.form-input.input-error {
+    border-color: var(--cl-danger) !important;
+    background-color: #fffafa;
+}
+
+.short-input {
+    width: 30%;
+}
+
+.config-textarea {
+    resize: vertical;
+    padding: 15px;
+    min-height: 130px;
+    background-color: #eeeded;
+    border: 0;
+    border-radius: 5px;
+}
+
+/* checkbox customizado */
+.custom-check {
+    position: relative;
+    height: 18px;
+    width: 18px;
+    background-color: #d9d9d9;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.custom-check:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}

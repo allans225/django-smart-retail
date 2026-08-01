@@ -73,11 +73,26 @@ class AddToCartView(View, MessageMixin):
         try:
             quantity = int(request.POST.get('quantity', 1))
         except (ValueError, TypeError):
-            quantity = 1
+            quantity = 0
 
         variation = get_object_or_404(models.Variation, id=variation_id)
 
-        # Validação de estoque
+        if variation.stock <= 0:
+            return self.render_message(
+                request,
+                message='Produto fora de estoque.',
+                level=django_messages.ERROR,
+                status=400
+            )
+
+        if quantity <= 0:
+            return self.render_message(
+                request,
+                message='Quantidade inválida. Por favor, insira um valor positivo.',
+                level=django_messages.ERROR,
+                status=400
+            )
+
         if variation.stock < quantity:
             return self.render_message(
                 request,
