@@ -8,13 +8,6 @@ from django.contrib.auth.password_validation import validate_password
 from utils.validator.text import validate_no_special_chars
 from utils.validator.cep import look_up_cep
 
-class BasicAuthData(forms.Form):
-    email = forms.EmailField(
-        validators=[EmailValidator(message="Informe um e-mail válido.")],
-        widget=forms.EmailInput(attrs={'class': 'auth-input', 'placeholder': 'Email'})
-    )
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'auth-input', 'placeholder': 'Senha'}))
-
 class BaseUserDataForm(forms.Form):
     first_name = forms.CharField(
         validators=[
@@ -44,6 +37,13 @@ class BaseUserDataForm(forms.Form):
             return datetime.strptime(date, "%Y-%m-%d").date()
         except ValueError:
             raise forms.ValidationError("Formato de data inválido")
+
+class BasicAuthData(forms.Form):
+    email = forms.EmailField(
+        validators=[EmailValidator(message="Informe um e-mail válido.")],
+        widget=forms.EmailInput(attrs={'class': 'auth-input', 'placeholder': 'Email'})
+    )
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'auth-input', 'placeholder': 'Senha'}))
 
 class LoginForm(BasicAuthData):
     remember = forms.BooleanField(required=False)
@@ -127,3 +127,75 @@ class UserBasicDataUpdateForm(BaseUserDataForm):
             'maxlength': '564' 
         })
     )
+
+class UserSecurityDataUpdateForm(forms.Form):
+    # Campos de segurança do usuário com required=False para permitir atualizações parciais
+    email = forms.EmailField(
+        required=False,
+        validators=[EmailValidator(message="Informe um e-mail válido.")],
+        widget=forms.EmailInput(attrs={'class': 'auth-input', 'placeholder': 'Email'})
+    )
+    username = forms.CharField(
+        required=False,
+        validators=[
+            MinLengthValidator(2, message="O nome de usuário deve ter pelo menos 2 caracteres"),
+            MaxLengthValidator(30, message="O nome de usuário deve ter menos de 20 caracteres")
+        ],
+        widget=forms.TextInput(attrs={'class': 'auth-input', 'placeholder': 'Nome de Usuário'})
+    )
+    password = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={'class': 'auth-input', 'placeholder': 'Senha'})
+    )
+    new_password = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={'class': 'auth-input', 'placeholder': 'Nova Senha'})
+    )
+    confirm_password = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={'class': 'auth-input', 'placeholder': 'Confirmar Nova Senha'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)  # Recebe o usuário atual
+        super().__init__(*args, **kwargs)
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        # Só valida se o email foi preenchido e se for diferente do atual
+        if email and self.user and self.user.email != email:
+            if User.objects.filter(email=email).exists():
+                raise forms.ValidationError("Este e-mail já está em uso por outra conta.")
+        return email
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        # Só valida se o username foi preenchido e se for diferente do atual
+        if username and self.user and self.user.username != username:
+            if User.objects.filter(username=username).exists():
+                raise forms.ValidationError("Este nome de usuário já está em uso.")
+        return username
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        new_password = cleaned_data.get("new_password")
+        confirm_password = cleaned_data.get("confirm_password")
+
+        # Se o usuário deseja alterar a senha, ele deve fornecer a senha atual
+        if new_password or confirm_password:
+            if not password:
+                self.add_error('password', "A senha atual é obrigatória para alterar a senha.")
+            elif not self.user.check_password(password):
+                self.add_error('password', "A senha atual está incorreta.")
+
+            if new_password != confirm_password:
+                self.add_error('confirm_password', "As novas senhas não coincidem.")
+            else:
+                # Validar a nova senha usando os validadores do Django
+                try:
+                    validate_password(new_password, user=self.user)
+                except forms.ValidationError as e:
+                    self.add_error('new_password', e.messages)
+
+        return cleaned_data

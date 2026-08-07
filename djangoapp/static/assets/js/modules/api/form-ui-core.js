@@ -12,6 +12,13 @@ const FormsUI = {
         }
     },
 
+    // Limpa os campos de input do formulário que possuem o atributo data-clear="true"
+    clearInputFields(form) {
+        form.querySelectorAll('[data-clear="true"]').forEach(input => {
+            input.value = '';
+        });
+    },
+
     // Limpa estados de erro do formulário
     clearErrors(form) {
         form.querySelectorAll('.error-message').forEach(span => {
@@ -77,6 +84,7 @@ export const FormsActions = {
                     // se não houver, mostra a mensagem
                     FormsUI.visualChargingFeedback(submitBtn);
                     showAlert(result.message || 'Dados salvos com sucesso!', result.tags || 'alert-success');
+                    FormsUI.clearInputFields(form);
                 }
             }
         } catch (error) {

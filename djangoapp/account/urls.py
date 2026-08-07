@@ -14,6 +14,7 @@ urlpatterns = [
     path('api/login/', views.LoginView.as_view(), name='login'),
     path('api/register/', views.RegisterView.as_view(), name='register'),
     path('api/update/basic-data', views.UpdateBasicDataView.as_view(), name='upt_basic_data'),
+    path('api/update/security-data', views.UpdateSecurityDataView.as_view(), name='upt_security_data'),
 
     # Logout
     path('logout/', views.LogoutView.as_view(), name='logout'),

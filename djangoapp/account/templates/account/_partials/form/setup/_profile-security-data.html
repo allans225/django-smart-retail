@@ -1,4 +1,60 @@
-<form id="securitydata-form" method="POST">
+<form id="securitydata-form" method="POST" data-url="{% url 'account:upt_security_data' %}">
     {% csrf_token %}
-    <h1>Security</h1>
+    <div class="form-section">
+        <h3>Alterar E-mail</h3>
+        <div class="input-group">
+            <input 
+                type="email" 
+                name="email" 
+                placeholder="E-mail" 
+                class="form-input"
+                value="{{ security_data_form.email.value|default_if_none:'' }}"
+            >
+            <span class="error-message" id="error-email"></span>
+        </div>
+        <h3>Alterar Nome de Usuário</h3>
+        <div class="input-group">
+            <input 
+                type="text"
+                name="username"
+                placeholder="Nome de Usuário"
+                class="form-input"
+                value="{{ security_data_form.username.value|default_if_none:'' }}"
+            >
+            <span class="error-message" id="error-username"></span>
+        </div>
+        <hr class="section-divider">
+        <h3>Alterar Senha</h3>
+        <div class="input-group">
+            <input 
+                type="password"
+                name="password" 
+                placeholder="Senha Atual" 
+                class="form-input"
+                data-clear="true"
+            >
+            <span class="error-message" id="error-password"></span>
+        </div>
+        <div class="input-group">
+            <input 
+                type="password" 
+                name="new_password" 
+                placeholder="Nova Senha" 
+                class="form-input"
+                data-clear="true"
+            >
+            <span class="error-message" id="error-new_password"></span>
+        </div>
+        <div class="input-group">
+            <input 
+                type="password"
+                name="confirm_password" 
+                placeholder="Confirmar Nova Senha"
+                class="form-input"
+                data-clear="true"
+            >
+            <span class="error-message" id="error-confirm_password"></span>
+        </div>
+        <button type="submit" class="btn-save">Salvar</button>
+    </div>
 </form>

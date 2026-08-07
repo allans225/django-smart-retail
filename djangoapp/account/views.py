@@ -13,8 +13,9 @@ from .models import Address
 from django.views.generic import TemplateView
 from django.http import JsonResponse
 from django.views import View
-from .forms import LoginForm, RegisterForm, UserBasicDataUpdateForm
+from .forms import LoginForm, RegisterForm, UserBasicDataUpdateForm, UserSecurityDataUpdateForm
 
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import authenticate, login
 from django.shortcuts import redirect, render
 from django.contrib.auth import logout
@@ -167,18 +168,24 @@ class SetupPanelView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         
-        initial_data = {
+        initial_basic_data = {
             'first_name': user.first_name,
             'last_name': user.last_name,
             'birth_date': user.profile.birth_date if hasattr(user, 'profile') else '',
             'biography': user.profile.bio if hasattr(user, 'profile') else '',
         }
-        
-        context['basic_data_form'] = UserBasicDataUpdateForm(initial=initial_data)
+
+        initial_security_data = {
+            'email': user.email,
+            'username': user.username,
+        }
+
+        context['basic_data_form'] = UserBasicDataUpdateForm(initial=initial_basic_data)
+        context['security_data_form'] = UserSecurityDataUpdateForm(initial=initial_security_data)
+
         return context
     
 class UpdateBasicDataView(LoginRequiredMixin, View):
-    
     def post(self, request):
         form = UserBasicDataUpdateForm(request.POST)
         if form.is_valid():
@@ -211,4 +218,51 @@ class UpdateBasicDataView(LoginRequiredMixin, View):
                 'status': 'error',
                 'message': 'Verifique os dados informados',
                 'errors': form.errors.get_json_data() # envia os erros de validação
+            }, status=400)
+
+class UpdateSecurityDataView(LoginRequiredMixin, View):
+    def post(self, request):
+        form = UserSecurityDataUpdateForm(request.POST, user=request.user)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    user = request.user
+                    email = form.cleaned_data.get('email')
+                    username = form.cleaned_data.get('username')
+                    new_password = form.cleaned_data.get('new_password')
+                    has_changes = False
+
+                    if email and email != user.email:
+                        user.email = email
+                        has_changes = True
+
+                    if username and username != user.username:
+                        user.username = username
+                        has_changes = True
+
+                    # Atualiza a senha apenas se o campo não estiver vazio e se passar na validação do form
+                    if new_password:
+                        user.set_password(new_password)
+                        has_changes = True
+
+                    if has_changes:
+                        user.save()
+                        if new_password:
+                            update_session_auth_hash(request, user)  # Mantém o usuário logado após a mudança de senha
+
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Dados atualizados com sucesso!'
+                })
+                
+            except Exception as e:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'Erro ao salvar os dados: {str(e)}'
+                }, status=500)
+        else:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Verifique os dados informados',
+                'errors': form.errors.get_json_data()
             }, status=400)
