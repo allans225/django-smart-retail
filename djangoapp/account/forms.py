@@ -199,3 +199,20 @@ class UserSecurityDataUpdateForm(forms.Form):
                     self.add_error('new_password', e.messages)
 
         return cleaned_data
+
+class UserAddressDataUpdateForm(forms.Form):
+    # Campos obrigatórios para atualização de endereço do usuário
+    zip_code = forms.CharField(max_length=8, required=True,widget=forms.TextInput(attrs={'placeholder': 'CEP'}))
+    number = forms.CharField(max_length=10, required=True, widget=forms.TextInput(attrs={'placeholder': 'Número'}))
+    street = forms.CharField(max_length=128, required=True, widget=forms.TextInput(attrs={'placeholder': 'Rua'}))
+    neighborhood = forms.CharField(max_length=64, required=True, widget=forms.TextInput(attrs={'placeholder': 'Bairro'}))
+    city = forms.CharField(max_length=64, required=True, widget=forms.TextInput(attrs={'placeholder': 'Cidade'}))
+    state = forms.ChoiceField(required=True, choices=Address._meta.get_field('state').choices)
+    country = forms.ChoiceField(required=True, choices=Address._meta.get_field('country').choices)
+    complement = forms.CharField(max_length=128, required=True, widget=forms.TextInput(attrs={'placeholder': 'Complemento'}))
+
+    def clean_zip_code(self):
+        cep = self.cleaned_data.get('zip_code')
+        if not look_up_cep(cep):
+            raise forms.ValidationError("CEP inválido ou não encontrado.")
+        return cep

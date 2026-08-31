@@ -93,7 +93,9 @@ class Address(models.Model):
         max_length=2, default="BR", 
         choices=[("BR", "Brasil")], 
         verbose_name="País")
-    
+
+    is_default = models.BooleanField(default=False, verbose_name="Endereço Principal")
+
     def clean(self):
         error_messages = {}
 
@@ -103,5 +105,15 @@ class Address(models.Model):
         if error_messages:
             raise ValidationError(error_messages)
 
+    def save(self, *args, **kwargs):
+        # Se o endereço for marcado como padrão, desmarque outros endereços do mesmo perfil
+        if self.is_default:
+            Address.objects.filter(
+                profile=self.profile, 
+                is_default=True
+            ).exclude(pk=self.pk).update(is_default=False) # exclude(self) para não desmarcar o próprio endereço
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.street}, {self.number} - {self.profile.user.username}"
+        status = "Principal" if self.is_default else ""
+        return f"{self.street}, {self.number} - {self.profile.user.username}{status}"

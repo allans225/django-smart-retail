@@ -4,7 +4,7 @@ from django.contrib import messages
 
 from utils.mixins import CartValidationMixin
 from utils.mixins import MessageMixin
-from utils.validator.address import get_user_address
+from utils.validator.address import get_user_default_address
 
 from cart.service.cart import CartService
 from order.service.order import OrderService
@@ -14,7 +14,7 @@ class CheckoutSummaryView(LoginRequiredMixin, MessageMixin, CartValidationMixin,
     template_name = 'order/order-summary.html'
 
     def get(self, request):
-        address = get_user_address(self.request.user)
+        address = get_user_default_address(self.request.user)
         if not address:
             self.render_message(
                 self.request, message="Adicione um endereço para finalizar seu pedido.",
@@ -42,7 +42,7 @@ class CheckoutSummaryView(LoginRequiredMixin, MessageMixin, CartValidationMixin,
    
 class CreateOrderView(LoginRequiredMixin, MessageMixin, CartValidationMixin, View):
     def post(self, request):
-        address = get_user_address(self.request.user)
+        address = get_user_default_address(self.request.user)
         if not address:
             self.render_message(
                 self.request,

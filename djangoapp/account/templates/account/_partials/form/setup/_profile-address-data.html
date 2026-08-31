@@ -1,4 +1,83 @@
-<form id="address-form" method="POST">
+<form id="address-form" method="POST" data-url="{% url 'account:upt_address_data' %}">
     {% csrf_token %}
-    <h1>Address</h1>
+    <div class="form-section">
+        <h3>Dados de Endereço</h3>
+        <div class="form-group">
+            <div class="input-group">
+                <input type="text" name="zip_code" placeholder="CEP" class="form-input"
+                    value="{{ address_data_form.zip_code.value|default_if_none:'' }}">
+                <span class="error-message" id="error-zip_code"></span>
+            </div>
+
+            <div class="input-group">
+                <input type="text" name="number" placeholder="Número" class="form-input"
+                    value="{{ address_data_form.number.value|default_if_none:'' }}">
+                <span class="error-message" id="error-number"></span>
+            </div>
+            <div class="input-group">
+                <input type="text" name="street" placeholder="Rua" class="form-input"
+                    value="{{ address_data_form.street.value|default_if_none:'' }}">
+                <span class="error-message" id="error-street"></span>
+            </div>
+            <div class="input-group">
+                <input type="text" name="neighborhood" placeholder="Bairro" class="form-input"
+                    value="{{ address_data_form.neighborhood.value|default_if_none:'' }}">
+                <span class="error-message" id="error-neighborhood"></span>
+            </div>
+            <div class="input-group">
+                <input type="text" name="city" placeholder="Cidade" class="form-input"
+                    value="{{ address_data_form.city.value|default_if_none:'' }}">
+                <span class="error-message" id="error-city"></span>
+            </div>
+
+            <div class="input-row">
+                <div class="input-group">
+                    <select name="state" class="form-input">
+                        <option value="" disabled selected>Estado</option>
+                        {% for value, label in states %}
+                            <option value="{{ address_data_form.state.value|default_if_none:'' }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="error-message" id="error-state"></span>
+                </div>    
+
+                <div class="input-group">
+                    <select name="country" class="form-input">
+                        <option value="" disabled selected>País</option>
+                        {% for value, label in countries %}
+                            <option value="{{ address_data_form.country.value|default_if_none:'' }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="error-message" id="error-country"></span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <input type="text" name="complement" placeholder="Complemento" class="form-input"
+                    value="{{ address_data_form.complement.value|default_if_none:'' }}">
+                <span class="error-message" id="error-complement"></span>
+            </div>
+
+            <button type="submit" class="btn-save">Salvar</button>
+        </div>
+    {% if saved_addresses %}
+    <hr class="section-divider">
+
+    <div class="form-section">
+        <div class="saved-addresses">
+            <h3>Endereços Salvos</h3>
+            {% for address in saved_addresses %}
+            <div class="table-card">
+                <table class="zebra-table">
+                    <tbody>
+                        <tr><td>{{ address.street }} {{ address.neighborhood }} {{ address.number }}</td></tr>
+                        <tr><td>{{ address.city }}, {{ address.state }}, {{ address.country }} - {{ address.zip_code }}</td></tr>
+                        <tr><td>{{ address.complement }}</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 </form>
