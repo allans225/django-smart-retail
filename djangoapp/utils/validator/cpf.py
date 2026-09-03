@@ -1,8 +1,12 @@
 import re
 
+def clean_data(cpf):
+    """Remove caracteres não numéricos do CPF."""
+    return re.sub(r'[^0-9]', '', str(cpf))
+
 def validate_cpf(cpf):
     # Limpa o CPF mantendo apenas números
-    cpf = re.sub(r'[^0-9]', '', str(cpf))
+    cpf = clean_data(cpf)
 
     # Verifica tamanho e se é uma sequência repetida
     if len(cpf) != 11 or cpf == cpf[0] * 11:

@@ -175,6 +175,7 @@ class SetupPanelView(LoginRequiredMixin, TemplateView):
             'first_name': user.first_name,
             'last_name': user.last_name,
             'birth_date': user.profile.birth_date if hasattr(user, 'profile') else '',
+            'cpf': user.profile.cpf if hasattr(user, 'profile') else '',
             'biography': user.profile.bio if hasattr(user, 'profile') else '',
         }
 
@@ -197,7 +198,10 @@ class SetupPanelView(LoginRequiredMixin, TemplateView):
             'username': user.username,
         }
 
-        context['basic_data_form'] = UserBasicDataUpdateForm(initial=initial_basic_data)
+        context['basic_data_form'] = UserBasicDataUpdateForm(
+            initial=initial_basic_data, 
+            profile=user.profile
+        )
         context['security_data_form'] = UserSecurityDataUpdateForm(initial=initial_security_data)
         context['address_data_form'] = UserAddressDataUpdateForm(initial=initial_address_data)
 
@@ -210,17 +214,18 @@ class SetupPanelView(LoginRequiredMixin, TemplateView):
     
 class UpdateBasicDataView(LoginRequiredMixin, View):
     def post(self, request):
-        form = UserBasicDataUpdateForm(request.POST)
+        user = request.user
+        profile, _ = Profile.objects.get_or_create(user=user)  # Garante que o profile exista
+        form = UserBasicDataUpdateForm(request.POST, profile=profile)
         if form.is_valid():
             try:
                 with transaction.atomic():
-                    user = request.user
                     user.first_name = form.cleaned_data.get('first_name')
                     user.last_name = form.cleaned_data.get('last_name')
                     user.save()
 
-                    profile, created = Profile.objects.get_or_create(user=user)
                     profile.birth_date = form.cleaned_data.get('birth_date')
+                    profile.cpf = form.cleaned_data.get('cpf')
                     profile.bio = form.cleaned_data.get('biography')
                     profile.save()
 

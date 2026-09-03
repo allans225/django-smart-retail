@@ -1,12 +1,13 @@
 from django import forms
 from datetime import datetime
 from django.contrib.auth.models import User
-from .models import Address
+from .models import Address, Profile
 from django.core.validators import MinLengthValidator, MaxLengthValidator, EmailValidator
 
 from django.contrib.auth.password_validation import validate_password
 from utils.validator.text import validate_no_special_chars
 from utils.validator.cep import look_up_cep
+from utils.validator import cpf as cpf_utils
 
 class BaseUserDataForm(forms.Form):
     first_name = forms.CharField(
@@ -118,6 +119,12 @@ class RegisterForm(BasicAuthData, BaseUserDataForm):
         return cep
 
 class UserBasicDataUpdateForm(BaseUserDataForm):
+    cpf = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'CPF'}),
+        max_length=14,
+    )
+
     biography = forms.CharField(
         required=False,
         max_length=564,
@@ -127,6 +134,46 @@ class UserBasicDataUpdateForm(BaseUserDataForm):
             'maxlength': '564' 
         })
     )
+
+    def __init__(self, *args, **kwargs):
+        self.profile = kwargs.pop('profile', None)
+        super().__init__(*args, **kwargs)
+
+        # Se o perfil do usuário já tiver um CPF, definimos o campo como somente leitura
+        if self.profile and self.profile.cpf: 
+            self.fields['cpf'].widget.attrs['readonly'] = 'readonly' # apenas para exibição, não permite edição
+            self.fields['cpf'].help_text = "O CPF não pode ser alterado uma vez definido."
+            current_class = self.fields['cpf'].widget.attrs.get('class', '')
+            self.fields['cpf'].widget.attrs['class'] = f"{current_class} input-readonly".strip() # Adiciona uma classe CSS para estilizar o campo como somente leitura
+            self.fields['cpf'].initial = self.profile.cpf  # Define o valor inicial do campo como o CPF existente
+
+    def clean_cpf(self):
+        if self.profile and self.profile.cpf:
+            return self.profile.cpf
+
+        cpf = self.cleaned_data.get('cpf')
+
+        # Campo opcional
+        if not cpf:
+            return None
+
+        cleaned_cpf = cpf_utils.clean_data(cpf)
+
+        # Valida usando o CPF limpo
+        if not cpf_utils.validate_cpf(cleaned_cpf):
+            raise forms.ValidationError("CPF inválido.")
+
+        # Consulta duplicidade no banco usando o CPF limpo
+        query = Profile.objects.filter(cpf=cleaned_cpf)
+        
+        # Se o perfil atual estiver definido, excluímos ele da consulta para evitar conflito consigo mesmo
+        if self.profile and self.profile.pk:
+            query = query.exclude(pk=self.profile.pk)
+
+        if query.exists():
+            raise forms.ValidationError("Este CPF já está em uso por outro usuário.")
+
+        return cleaned_cpf
 
 class UserSecurityDataUpdateForm(forms.Form):
     # Campos de segurança do usuário com required=False para permitir atualizações parciais

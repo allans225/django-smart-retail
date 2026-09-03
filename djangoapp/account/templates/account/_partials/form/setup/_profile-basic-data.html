@@ -22,15 +22,30 @@
             >
             <span class="error-message" id="error-last_name"></span>
         </div>
-        <div class="input-group">
-            <input 
-                type="date"
-                name="birth_date" 
-                placeholder="Data de Aniversário"
-                class="form-input short-input"
-                value="{{ basic_data_form.birth_date.value|date:'Y-m-d' }}"
-            >
-            <span class="error-message" id="error-birth_date"></span>
+        <div class="input-row">
+            <div class="input-group">
+                <input 
+                    type="date"
+                    name="birth_date" 
+                    placeholder="Data de Aniversário"
+                    class="form-input"
+                    value="{{ basic_data_form.birth_date.value|date:'Y-m-d' }}"
+                >
+                <span class="error-message" id="error-birth_date"></span>
+            </div>
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    name="cpf" 
+                    placeholder="CPF" 
+                    class="form-input {% if basic_data_form.cpf.field.widget.attrs.readonly %}input-readonly{% endif %}"
+                    value="{{ basic_data_form.cpf.value|default_if_none:'' }}"
+                    data-mask="cpf"
+                    maxlength="14"
+                    {% if basic_data_form.cpf.field.widget.attrs.readonly %}readonly{% endif %}
+                >
+                <span class="error-message" id="error-cpf"></span>
+            </div>
         </div>
     </div>
     <hr class="section-divider">

@@ -1,4 +1,4 @@
-import { FormsActions } from '../../modules/api/form-ui-core.js';
+import { FormsActions, Masks } from '../../modules/api/form-ui-core.js';
 import { AddressActions } from '../../modules/api/address.js';
 
 const SetupFormsUI = {
@@ -75,5 +75,14 @@ const init = () => {
 
     if (zipInput)
         zipInput.addEventListener('input', (e) => AddressActions.handleCepLocup(e));
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Inicializa a máscara de CPF
+        Masks.init();
+        // Aplica a máscara de CPF aos campos existentes com o valor já preenchido do banco de dados
+        document.querySelectorAll('[data-mask="cpf"]').forEach(input => {
+            input.value = Masks.cpf(input.value);
+        });
+    });
 }
 init();

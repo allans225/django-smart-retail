@@ -58,8 +58,28 @@ const FormsUI = {
                 console.warn(`Aviso: Span error-${fieldName} não encontrado no HTML`)
             }
         });
-    }
+    }  
 }
+export const Masks = {
+    cpf(value) {
+        return value
+            .replace(/\D/g, '')                     // Remove tudo que não é dígito
+            .replace(/(\d{3})(\d)/, '$1.$2')        // Coloca ponto entre o terceiro e o quarto dígitos
+            .replace(/(\d{3})(\d)/, '$1.$2')        // Coloca ponto entre o sexto e o sétimo dígitos
+            .replace(/(\d{3})(\d{1,2})$/, '$1-$2')  // Coloca hífen entre o nono e o décimo dígitos
+            .replace(/(-\d{2})\d+?$/, '$1');        // Impede que mais de dois dígitos sejam digitados após o hífen
+    },
+
+    init() {
+        document.addEventListener('input', (e) => {
+            const input = e.target;
+            const maskType = input.getAttribute('data-mask');
+            if (maskType && this[maskType]) {
+                input.value = this[maskType](input.value);
+            }
+        });
+    }
+};
 
 export const FormsActions = {
     async handleSubmit(e) {
