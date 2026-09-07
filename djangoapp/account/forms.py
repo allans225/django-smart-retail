@@ -6,7 +6,7 @@ from django.core.validators import MinLengthValidator, MaxLengthValidator, Email
 
 from django.contrib.auth.password_validation import validate_password
 from utils.validator.text import validate_no_special_chars
-from utils.validator.cep import look_up_cep
+from utils.validator import cep as cep_utils
 from utils.validator import cpf as cpf_utils
 
 class BaseUserDataForm(forms.Form):
@@ -53,14 +53,14 @@ class RegisterForm(BasicAuthData, BaseUserDataForm):
     username = forms.CharField(
         validators=[
             MinLengthValidator(2, message="O nome de usuário deve ter pelo menos 2 caracteres"),
-            MaxLengthValidator(30, message="O nome de usuário deve ter menos de 20 caracteres")
+            MaxLengthValidator(30, message="O nome de usuário deve ter menos de 30 caracteres")
         ],
         widget=forms.TextInput(attrs={'class': 'auth-input', 'placeholder': 'Nome de Usuário'})
     )
     confirm_passw = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'auth-input', 'placeholder': 'Confirmar Senha'}))
 
     # campos de endereço são OPCIONAIS no formulário de registro de usuário.
-    zip_code = forms.CharField(max_length=8, required=False,widget=forms.TextInput(attrs={'placeholder': 'CEP'}))
+    zip_code = forms.CharField(max_length=9, required=False,widget=forms.TextInput(attrs={'placeholder': 'CEP'}))
     number = forms.CharField(max_length=10, required=False, widget=forms.TextInput(attrs={'placeholder': 'Número'}))
     street = forms.CharField(max_length=128, required=False, widget=forms.TextInput(attrs={'placeholder': 'Rua'}))
     neighborhood = forms.CharField(max_length=64, required=False, widget=forms.TextInput(attrs={'placeholder': 'Bairro'}))
@@ -83,8 +83,15 @@ class RegisterForm(BasicAuthData, BaseUserDataForm):
         confirm_passw = cleaned_data.get("confirm_passw")
 
         if password and confirm_passw and password != confirm_passw:
-            raise forms.ValidationError("As senhas não coincidem.")
+            self.add_error("As senhas não coincidem.")
 
+        # Checagem de Endereço Parcial
+        zip_code = cleaned_data.get("zip_code")
+        number = cleaned_data.get("number")
+
+        # Se informou o CEP mas não digitou o número:
+        if zip_code and not number:
+            self.add_error('number', "Por favor, informe o número do endereço.")
         return cleaned_data
     
     def clean_email(self):
@@ -113,10 +120,14 @@ class RegisterForm(BasicAuthData, BaseUserDataForm):
         # campo não obrigatório
         if not cep:
             return cep
+
+        cleaned_cep = cep_utils.clean_data(cep)
+        
         # se preenchido, validamos na API
-        if not look_up_cep(cep):
+        if not cep_utils.look_up_cep(cleaned_cep):
             raise forms.ValidationError("CEP inválido ou não encontrado.")
-        return cep
+        
+        return cleaned_cep
 
 class UserBasicDataUpdateForm(BaseUserDataForm):
     cpf = forms.CharField(
@@ -249,7 +260,7 @@ class UserSecurityDataUpdateForm(forms.Form):
 
 class UserAddressDataUpdateForm(forms.Form):
     # Campos obrigatórios para atualização de endereço do usuário
-    zip_code = forms.CharField(max_length=8, required=True,widget=forms.TextInput(attrs={'placeholder': 'CEP'}))
+    zip_code = forms.CharField(max_length=9, required=True,widget=forms.TextInput(attrs={'placeholder': 'CEP'}))
     number = forms.CharField(max_length=10, required=True, widget=forms.TextInput(attrs={'placeholder': 'Número'}))
     street = forms.CharField(max_length=128, required=True, widget=forms.TextInput(attrs={'placeholder': 'Rua'}))
     neighborhood = forms.CharField(max_length=64, required=True, widget=forms.TextInput(attrs={'placeholder': 'Bairro'}))
@@ -260,6 +271,7 @@ class UserAddressDataUpdateForm(forms.Form):
 
     def clean_zip_code(self):
         cep = self.cleaned_data.get('zip_code')
-        if not look_up_cep(cep):
+        cleaned_cep = cep_utils.clean_data(cep)
+        if not cep_utils.look_up_cep(cleaned_cep):
             raise forms.ValidationError("CEP inválido ou não encontrado.")
-        return cep
+        return cleaned_cep

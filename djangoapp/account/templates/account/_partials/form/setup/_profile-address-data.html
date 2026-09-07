@@ -4,8 +4,15 @@
         <h3>Dados de Endereço</h3>
         <div class="form-group">
             <div class="input-group">
-                <input type="text" name="zip_code" placeholder="CEP" class="form-input"
-                    value="{{ address_data_form.zip_code.value|default_if_none:'' }}">
+                <input 
+                    type="text" 
+                    name="zip_code" 
+                    placeholder="CEP" 
+                    class="form-input"
+                    data-mask="cep"
+                    maxlength="9"
+                    value="{{ address_data_form.zip_code.value|default_if_none:'' }}"
+                >
                 <span class="error-message" id="error-zip_code"></span>
             </div>
 
@@ -60,6 +67,7 @@
 
             <button type="submit" class="btn-save">Salvar</button>
         </div>
+    </div>
     {% if saved_addresses %}
     <hr class="section-divider">
 

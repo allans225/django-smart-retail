@@ -129,7 +129,7 @@ class RegisterView(View):
                         )
 
                 # Logar o usuário automaticamente
-                login(request, user)
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 messages.success(request, f"Bem-vindo, {user.first_name}! Cadastro realizado com sucesso.")
 
                 return JsonResponse({
@@ -155,7 +155,7 @@ class RegisterView(View):
                 return JsonResponse({
                     'status': 'error',
                     'message': f'Erro inesperado: {str(e)}'
-                }, status=400)
+                }, status=500)
             
         # Se o form não for válido, retorna os erros específicos dos campos
         return JsonResponse({

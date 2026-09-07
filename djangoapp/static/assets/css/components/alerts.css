@@ -122,3 +122,14 @@
     opacity: 1 !important;
     max-height: none !important; /* Remove a restrição de altura */
 }
+
+.error-message:empty {
+    display: none !important;
+}
+
+.error-message:not(:empty) {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    max-height: none !important;
+}

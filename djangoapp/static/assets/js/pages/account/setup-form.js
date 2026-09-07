@@ -58,6 +58,19 @@ const SetupFormsUI = {
 const init = () => {
     SetupFormsUI.initTabs();
 
+    // Inicializa a máscara de CPF
+    Masks.init();
+    // Aplica a máscara de CPF aos campos existentes com o valor já preenchido do banco de dados
+    document.querySelectorAll('[data-mask="cpf"]').forEach(input => {
+        if (input.value)
+            input.value = Masks.cpf(input.value);
+    });
+    // Aplica a máscara de CEP aos campos existentes com o valor já preenchido do banco de dados
+    document.querySelectorAll('[data-mask="cep"]').forEach(input => {
+        if (input.value)
+            input.value = Masks.cep(input.value);
+    });
+
     const basicdataForm = document.getElementById('basicdata-form');
     const addressForm = document.getElementById('address-form');
     const securityForm = document.getElementById('securitydata-form');
@@ -75,14 +88,5 @@ const init = () => {
 
     if (zipInput)
         zipInput.addEventListener('input', (e) => AddressActions.handleCepLocup(e));
-
-    document.addEventListener('DOMContentLoaded', () => {
-        // Inicializa a máscara de CPF
-        Masks.init();
-        // Aplica a máscara de CPF aos campos existentes com o valor já preenchido do banco de dados
-        document.querySelectorAll('[data-mask="cpf"]').forEach(input => {
-            input.value = Masks.cpf(input.value);
-        });
-    });
 }
 init();

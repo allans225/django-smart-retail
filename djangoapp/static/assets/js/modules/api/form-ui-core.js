@@ -23,7 +23,6 @@ const FormsUI = {
     clearErrors(form) {
         form.querySelectorAll('.error-message').forEach(span => {
             span.innerText = '';
-            span.style.display = 'none';
         });
         form.querySelectorAll('.form-input').forEach(input => input.classList.remove('input-error'));
     },
@@ -34,8 +33,9 @@ const FormsUI = {
 
             // Trata o erro global "__all__" jogando para o showAlert
             if (fieldName === '__all__') {
-                const globalMessage = errors['__all__'][0].message;
-                showAlert(globalMessage, 'alert-danger');
+                const globalMessage = errors['__all__'][0].message || errors['__all__'][0];
+                // Se a função showAlert estiver definida, exibe o alerta global
+                if (typeof showAlert === 'function') showAlert(globalMessage, 'alert-danger');
                 return; // pula para o próximo campo
             }
 
@@ -47,10 +47,6 @@ const FormsUI = {
                 const message = errors[fieldName][0].message || errors[fieldName][0];
                 errorSpan.innerText = message;
                 
-                errorSpan.style.display = 'block';
-                errorSpan.style.maxHeight = 'none';
-                errorSpan.style.opacity = '1';
-                
                 if (inputField) {
                     inputField.classList.add('input-error');
                 }
@@ -60,6 +56,7 @@ const FormsUI = {
         });
     }  
 }
+
 export const Masks = {
     cpf(value) {
         return value
@@ -68,6 +65,13 @@ export const Masks = {
             .replace(/(\d{3})(\d)/, '$1.$2')        // Coloca ponto entre o sexto e o sétimo dígitos
             .replace(/(\d{3})(\d{1,2})$/, '$1-$2')  // Coloca hífen entre o nono e o décimo dígitos
             .replace(/(-\d{2})\d+?$/, '$1');        // Impede que mais de dois dígitos sejam digitados após o hífen
+    },
+
+    cep(value) {
+        return value
+            .replace(/\D/g, '')                     // Remove tudo que não é dígito
+            .replace(/(\d{5})(\d)/, '$1-$2')        // Coloca hífen entre o quinto e o sexto dígitos
+            .replace(/(-\d{3})\d+?$/, '$1');        // Impede que mais de três dígitos sejam digitados após o hífen
     },
 
     init() {

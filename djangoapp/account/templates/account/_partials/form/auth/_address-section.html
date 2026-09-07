@@ -1,12 +1,20 @@
 {% load static %}
 
 <div id="address-section" class="address-collapsible">
-    <div class="input-group">
-        <input type="text" name="zip_code" placeholder="CEP" class="form-input">
-        <span class="error-message" id="error-zip_code"></span>
+    <div class="input-row"> 
+        <div class="input-group">
+            <input type="text" 
+                name="zip_code" 
+                placeholder="CEP" 
+                class="form-input"
+                data-mask="cep"
+                maxlength="9">
+            <span class="error-message" id="error-zip_code"></span>
+        </div>
+    
+        <input type="text" name="number" placeholder="Número" class="form-input">
     </div>
-
-    <input type="text" name="number" placeholder="Número" class="form-input">
+    
     <input type="text" name="street" placeholder="Rua" class="form-input">
     <input type="text" name="neighborhood" placeholder="Bairro" class="form-input">
     <input type="text" name="city" placeholder="Cidade" class="form-input">

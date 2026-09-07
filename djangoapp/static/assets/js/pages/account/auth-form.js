@@ -1,4 +1,4 @@
-import { FormsActions } from '../../modules/api/form-ui-core.js';
+import { FormsActions, Masks } from '../../modules/api/form-ui-core.js';
 import { AddressActions } from '../../modules/api/address.js';
 
 const FormsUI = {
@@ -57,6 +57,13 @@ const init = () => {
 
     if (zipInput) 
         zipInput.addEventListener('input', (e) => AddressActions.handleCepLocup(e));
+
+    Masks.init();
+    // Aplica a máscara de CEP aos campos existentes com o valor já preenchido do banco de dados
+    document.querySelectorAll('[data-mask="cep"]').forEach(input => {
+        if (input.value)
+            input.value = Masks.cep(input.value);
+    });
 
     toggleLinks.forEach(link => {
         link.addEventListener('click', (e) => FormsUI.switchAuthMode(e));

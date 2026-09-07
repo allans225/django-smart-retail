@@ -1,12 +1,18 @@
 import re
 import requests # type: ignore
 
+def clean_data(cep):
+    """
+    Limpa o CEP, removendo caracteres não numéricos
+    """
+    return re.sub(r'[^0-9]', '', str(cep))
+
 """
 Validação de CEP para uma resposta rápida no Admin
 """
 def validate_cep(cep):
     # Mantém apenas números
-    cep = re.sub(r'[^0-9]', '', str(cep))
+    cep = clean_data(cep)
 
     # Verifica se tem 8 dígitos
     if len(cep) != 8:
@@ -24,7 +30,7 @@ Consulta de API na base dos correios, usar no Frontend
 para preencher o endereço automaticamente para o usuário
 """
 def look_up_cep(cep):
-    cep_limpo = re.sub(r'[^0-9]', '', str(cep))
+    cep_limpo = clean_data(cep)
     url = f"https://viacep.com.br/ws/{cep_limpo}/json/"
     try:
         # Timeout de 2 segundos para não travar o servidor se a API demorar
