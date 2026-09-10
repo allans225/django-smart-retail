@@ -1,0 +1,13 @@
+{% extends "account/dashboard_base.html" %}
+{% load static %}
+
+{% block dashboard_title %}Segurança da Conta{% endblock dashboard_title %}
+{% block dashboard_subtitle %}Gerencie as configurações de segurança da sua conta{% endblock dashboard_subtitle %}
+
+{% block dashboard_form %}
+    {% include 'account/_partials/form/setup/_profile-security-data.html' %}
+{% endblock dashboard_form %}
+
+{% block dashboard_scripts %}
+    {{ block.super }}
+{% endblock dashboard_scripts %}

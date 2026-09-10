@@ -1,0 +1,49 @@
+{% extends 'static/base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="profile-settings-container">
+    <aside class="block avatar-setup-block">
+        <div class="avatar-circle">
+            <a href="#" aria-label="Alterar Foto de Perfil">
+                <img src="{% static 'assets/img/icons/user.svg' %}" alt="User Avatar">
+            </a>
+        </div>
+    </aside><!-- Foto de Perfil do User -->
+
+    <header class="block header-setup-block">
+        <h2>{% block dashboard_title %}Dados Básicos{% endblock dashboard_title %}</h2>
+        <p>{% block dashboard_subtitle %}Edite ou Adicione novas Informações{% endblock dashboard_subtitle %}</p>
+    </header><!-- Cabeçalho do Painel-->
+
+    <nav class="block menu-setup-block">
+        <ul class="settings-menu">
+            <li class="{% if request.resolver_match.view_name == 'account:dashboard' %}active{% endif %}">
+                <a href="{% url 'account:dashboard' %}">Perfil</a>
+            </li>
+            <li class="{% if request.resolver_match.view_name == 'account:dashboard_address' %}active{% endif %}">
+                <a href="{% url 'account:dashboard_address' %}">Endereços</a>
+            </li>
+            <li class="{% if request.resolver_match.view_name == 'account:dashboard_security' %}active{% endif %}">
+                <a href="{% url 'account:dashboard_security' %}">Segurança da Conta</a>
+            </li>
+        </ul>
+    </nav><!-- Menu Lateral -->
+
+    <section class="block form-setup-block">
+        {% block dashboard_form %}
+            {% include 'account/_partials/form/setup/_profile-basic-data.html' %}
+        {% endblock dashboard_form %}
+    </section><!-- Formulário -->
+</main>
+{% endblock %}
+
+{% block scripts %}
+    <!--
+        As páginas filhas devem usar {{ block.super }} para manter o script principal.
+        Pode-se adicionar scripts adicionais para cada página single, mas o script principal deve ser mantido.
+    -->
+    {% block dashboard_scripts %}
+        <script type="module" src="{% static 'assets/js/pages/account/setup-form.js' %}"></script>
+    {% endblock dashboard_scripts %}
+{% endblock  %}

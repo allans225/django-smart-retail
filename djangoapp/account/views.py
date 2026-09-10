@@ -164,13 +164,13 @@ class RegisterView(View):
             'errors': form.errors.get_json_data()
         }, status=400)
 
-class SetupPanelView(LoginRequiredMixin, TemplateView):
-    template_name = 'account/setup-panel.html'
+class DashBoardHomeView(LoginRequiredMixin, TemplateView):
+    template_name = 'account/dashboard_base.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        
+
         initial_basic_data = {
             'first_name': user.first_name,
             'last_name': user.last_name,
@@ -178,41 +178,12 @@ class SetupPanelView(LoginRequiredMixin, TemplateView):
             'cpf': user.profile.cpf if hasattr(user, 'profile') else '',
             'biography': user.profile.bio if hasattr(user, 'profile') else '',
         }
-
-        default = get_user_default_address(user)
-        addresses = get_user_addresses(user)
-
-        initial_address_data = {
-            'zip_code': default.zip_code if default else '',
-            'number': default.number if default else '',
-            'street': default.street if default else '',
-            'neighborhood': default.neighborhood if default else '',
-            'city': default.city if default else '',
-            'state': default.state if default else '',
-            'country': default.country if default else '',
-            'complement': default.complement if default else '',
-        }
-
-        initial_security_data = {
-            'email': user.email,
-            'username': user.username,
-        }
-
+        
         context['basic_data_form'] = UserBasicDataUpdateForm(
-            initial=initial_basic_data, 
-            profile=user.profile
-        )
-        context['security_data_form'] = UserSecurityDataUpdateForm(initial=initial_security_data)
-        context['address_data_form'] = UserAddressDataUpdateForm(initial=initial_address_data)
-
-        context['states'] = Address._meta.get_field('state').choices
-        context['countries'] = Address._meta.get_field('country').choices
-
-        context['saved_addresses'] = addresses if addresses else []
-        print("Saved addresses:", context['saved_addresses'])  # Debugging line to check saved addresses
+            initial=initial_basic_data, profile=user.profile)
+        
         return context
-    
-class UpdateBasicDataView(LoginRequiredMixin, View):
+
     def post(self, request):
         user = request.user
         profile, _ = Profile.objects.get_or_create(user=user)  # Garante que o profile exista
@@ -248,7 +219,95 @@ class UpdateBasicDataView(LoginRequiredMixin, View):
                 'errors': form.errors.get_json_data() # envia os erros de validação
             }, status=400)
 
-class UpdateSecurityDataView(LoginRequiredMixin, View):
+class DashBoardAddressView(LoginRequiredMixin, TemplateView):
+    template_name = 'account/dashboard_address.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        
+        default = get_user_default_address(user)
+        addresses = get_user_addresses(user)
+
+        initial_address_data = {
+            'zip_code': default.zip_code if default else '',
+            'number': default.number if default else '',
+            'street': default.street if default else '',
+            'neighborhood': default.neighborhood if default else '',
+            'city': default.city if default else '',
+            'state': default.state if default else '',
+            'country': default.country if default else '',
+            'complement': default.complement if default else '',
+        }
+
+        context['address_data_form'] = UserAddressDataUpdateForm(initial=initial_address_data)
+
+        context['states'] = Address._meta.get_field('state').choices
+        context['countries'] = Address._meta.get_field('country').choices
+
+        context['saved_addresses'] = addresses if addresses else []
+        return context
+
+    def post(self, request):
+        form = UserAddressDataUpdateForm(request.POST)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    user = request.user
+                    
+                    # Desempacotando a tupla corretamente (ignora o booleano)
+                    profile, created = Profile.objects.get_or_create(user=user)
+                    
+                    # Busca o primeiro endereço do perfil. Se não existir, cria uma nova instância.
+                    address = Address.objects.filter(profile=profile).first()
+                    if not address:
+                        address = Address(profile=profile, is_default=True)
+
+                    # Atualizando os campos
+                    address.zip_code = form.cleaned_data.get('zip_code')
+                    address.number = form.cleaned_data.get('number')
+                    address.street = form.cleaned_data.get('street')
+                    address.neighborhood = form.cleaned_data.get('neighborhood')
+                    address.city = form.cleaned_data.get('city')
+                    address.state = form.cleaned_data.get('state')
+                    address.country = form.cleaned_data.get('country')
+                    address.complement = form.cleaned_data.get('complement')
+                
+                    address.full_clean()
+                    address.save()
+
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Endereço atualizado com sucesso!'
+                })
+
+            except Exception as e:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'Erro ao salvar os dados: {str(e)}'
+                }, status=500)
+        else:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Verifique os dados informados',
+                'errors': form.errors.get_json_data()
+            }, status=400)
+
+class DashBoardSecurityView(LoginRequiredMixin, TemplateView):
+    template_name = 'account/dashboard_security.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        initial_security_data = {
+            'email': user.email,
+            'username': user.username,
+        }
+
+        context['security_data_form'] = UserSecurityDataUpdateForm(initial=initial_security_data)
+        return context
+    
     def post(self, request):
         form = UserSecurityDataUpdateForm(request.POST, user=request.user)
         if form.is_valid():
@@ -283,52 +342,6 @@ class UpdateSecurityDataView(LoginRequiredMixin, View):
                     'message': 'Dados atualizados com sucesso!'
                 })
                 
-            except Exception as e:
-                return JsonResponse({
-                    'status': 'error',
-                    'message': f'Erro ao salvar os dados: {str(e)}'
-                }, status=500)
-        else:
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Verifique os dados informados',
-                'errors': form.errors.get_json_data()
-            }, status=400)
-
-class UpdateAddressDataView(LoginRequiredMixin, View):
-    def post(self, request):
-        form = UserAddressDataUpdateForm(request.POST)
-        if form.is_valid():
-            try:
-                with transaction.atomic():
-                    user = request.user
-                    
-                    # Desempacotando a tupla corretamente (ignora o booleano)
-                    profile, created = Profile.objects.get_or_create(user=user)
-                    
-                    # Busca o primeiro endereço do perfil. Se não existir, cria uma nova instância.
-                    address = Address.objects.filter(profile=profile).first()
-                    if not address:
-                        address = Address(profile=profile, is_default=True)
-
-                    # Atualizando os campos
-                    address.zip_code = form.cleaned_data.get('zip_code')
-                    address.number = form.cleaned_data.get('number')
-                    address.street = form.cleaned_data.get('street')
-                    address.neighborhood = form.cleaned_data.get('neighborhood')
-                    address.city = form.cleaned_data.get('city')
-                    address.state = form.cleaned_data.get('state')
-                    address.country = form.cleaned_data.get('country')
-                    address.complement = form.cleaned_data.get('complement')
-                
-                    address.full_clean()
-                    address.save()
-
-                return JsonResponse({
-                    'status': 'success',
-                    'message': 'Endereço atualizado com sucesso!'
-                })
-
             except Exception as e:
                 return JsonResponse({
                     'status': 'error',
