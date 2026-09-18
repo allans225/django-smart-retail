@@ -14,14 +14,16 @@ from django.views.generic import TemplateView
 from django.http import JsonResponse
 from django.views import View
 from .forms import \
-    LoginForm,  RegisterForm, UserBasicDataUpdateForm, \
-    UserSecurityDataUpdateForm, UserAddressDataUpdateForm
+    LoginForm,  RegisterForm, \
+    UserBasicDataUpdateForm, UserSecurityDataUpdateForm, \
+    UserAddressDataUpdateForm, ProfilePictureUpdateForm
 
+from utils.validator.address import get_user_default_address, get_user_addresses
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
 from django.shortcuts import redirect
-from utils.validator.address import get_user_default_address, get_user_addresses
 
 class AuthView(TemplateView):
     template_name = 'account/auth.html'
@@ -353,3 +355,55 @@ class DashBoardSecurityView(LoginRequiredMixin, TemplateView):
                 'message': 'Verifique os dados informados',
                 'errors': form.errors.get_json_data()
             }, status=400)
+
+class DashBoardProfileView(LoginRequiredMixin, TemplateView):
+    template_name = 'account/dashboard_profile.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        init_profile_data = {
+            'picture': user.profile.picture if hasattr(user, 'profile') else None,
+        }
+
+        context['profile_picture_form'] = ProfilePictureUpdateForm(initial=init_profile_data)
+        
+        return context
+
+@login_required
+def update_profile_picture_view(request):
+    if request.method == 'POST':
+        form = ProfilePictureUpdateForm(request.POST, request.FILES)
+        if form.is_valid():
+            profile = request.user.profile
+            new_picture = form.cleaned_data['profile_picture']
+
+            if new_picture:
+                profile.picture = new_picture
+                profile.save()
+
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Foto atualizada com sucesso!',
+            }, status=200)
+        else:
+            return JsonResponse({'errors': form.errors}, status=400)
+    else:
+        return JsonResponse({'errors': 'Método não permitido.'}, status=405)
+
+@login_required
+def delete_profile_picture_view(request):
+    if request.method == 'POST':
+        profile = request.user.profile
+
+        if profile.picture:
+            profile.picture = None
+            profile.save()
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Foto removida com sucesso!',
+        }, status=200)
+
+    return JsonResponse({'error': 'Ação não permitida'}, status=405)

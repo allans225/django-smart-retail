@@ -3,9 +3,10 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from .models import Address, Profile
 from django.core.validators import MinLengthValidator, MaxLengthValidator, EmailValidator
+from django.core.validators import FileExtensionValidator
 
-from django.contrib.auth.password_validation import validate_password
 from utils.validator.text import validate_no_special_chars
+from django.contrib.auth.password_validation import validate_password
 from utils.validator import cep as cep_utils
 from utils.validator import cpf as cpf_utils
 
@@ -275,3 +276,16 @@ class UserAddressDataUpdateForm(forms.Form):
         if not cep_utils.look_up_cep(cleaned_cep):
             raise forms.ValidationError("CEP inválido ou não encontrado.")
         return cleaned_cep
+
+class ProfilePictureUpdateForm(forms.Form):
+    profile_picture = forms.ImageField(
+        required=False,
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=['jpg', 'jpeg', 'png', 'webp', 'jfif', 'pjpeg', 'pjp']
+            )
+        ],
+        error_messages={
+            'invalid_extension': 'Formato não suportado. Envie JPG, PNG ou WEBP.'
+        }
+    )

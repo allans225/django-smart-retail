@@ -1,0 +1,86 @@
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--cl-blue);
+    background-color: whitesmoke;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.dropdown-avatar-img {
+    width: 20px;
+    height: 20px;
+    object-fit: cover;
+}
+
+.dropdown-avatar-img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.dropdown-avatar-avatar {
+    width: 25px;
+    height: 25px;
+    object-fit: cover;
+}
+
+.avatar-setup-block {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.avatar-setup-block .avatar-circle {
+    width: 110px;
+    height: 110px;
+    margin:0 auto;
+    overflow: hidden;
+}
+
+.avatar-img-dashboard {
+    width: 45px;
+    height: 45px;
+}
+
+.avatar-circle a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+}
+
+.user-img-dashboard {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: filter 0.3s ease;
+}
+
+.avatar-setup-block .avatar-circle a::after {
+    content: '';
+    position:absolute;
+    top:0; left:0; right:0; bottom:0;
+    background-color: rgba(0, 0, 0, 0.5);
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 32px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.avatar-circle a:hover .user-img-dashboard {
+    filter: brightness(0.7);
+}
+
+.avatar-circle a:hover::after {
+    opacity: 1;
+}

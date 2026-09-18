@@ -2,8 +2,10 @@ from django.db import models
 from datetime import date
 from django.forms import ValidationError
 from django.contrib.auth.models import User
+from utils.files import get_file_path
 from utils.validator.cpf import validate_cpf
 from utils.validator.cep import validate_cep
+from django.core.validators import FileExtensionValidator
 
 class Profile(models.Model):
     class Meta:
@@ -14,6 +16,13 @@ class Profile(models.Model):
     birth_date = models.DateField(null=True, blank=True, verbose_name="Data de Nascimento")
     bio = models.TextField(null=True, blank=True, verbose_name="Biografia")
     cpf = models.CharField(max_length=11, unique=True, null=True, blank=True, verbose_name="CPF")
+    picture = models.ImageField(
+        upload_to=get_file_path,
+        max_length=255,
+        null=True, blank=True,
+        verbose_name="Foto de Perfil",
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'webp', 'jfif', 'pjpeg', 'pjp'])]
+    )
 
     # Propriedade para calcular a idade com base na data de nascimento
     @property

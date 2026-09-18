@@ -177,3 +177,33 @@ select.form-input {
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
 }
+
+.form-section .form-input[type="file"] {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.form-section .form-input[type="file"]:hover {
+    border-color: #d1d5db;
+}
+
+.form-section [type="file"]::file-selector-button {
+    background-color: transparent;
+    border: none;
+    font-weight: 700;
+    color: #504d4d;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.form-section .form-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* Espaço entre os botões */
+}

@@ -5,8 +5,12 @@
 <main class="profile-settings-container">
     <aside class="block avatar-setup-block">
         <div class="avatar-circle">
-            <a href="#" aria-label="Alterar Foto de Perfil">
-                <img src="{% static 'assets/img/icons/user.svg' %}" alt="User Avatar">
+            <a href="{% url 'account:dashboard_profile' %}" aria-label="Alterar Foto de Perfil" class="avatar-link">
+                {% if user.profile.picture %}
+                    <img src="{{ user.profile.picture.url }}" alt="User Avatar" class="user-img-dashboard">
+                {% else %}
+                    <img src="{% static 'assets/img/icons/user.svg' %}" alt="User Avatar" class="avatar-img-dashboard">
+                {% endif %}
             </a>
         </div>
     </aside><!-- Foto de Perfil do User -->

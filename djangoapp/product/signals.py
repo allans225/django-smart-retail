@@ -1,24 +1,8 @@
 from django.db.models.signals import post_save, pre_save, post_delete
 from .models import Product, VariationImage
 from utils.images import process_image_for_webp
-from utils.files import delete_old_file
+from utils.files import delete_old_file, delete_file_pre_save
 from django.dispatch import receiver
-
-""" Função Genérica para deletar a imagem antiga do sistema de arquivos """
-def delete_file_pre_save(sender, instance, field_name, **kwargs):
-    if not instance.pk:
-        return False    # se for criação, não tem imagem antiga para deletar
-
-    try:
-        old_instance = sender.objects.get(pk=instance.pk)   # pega o objeto antigo do banco
-        old_file = getattr(old_instance, field_name)        # pega o arquivo antigo usando o nome do campo
-        new_file = getattr(instance, field_name)            # pega o novo arquivo usando o nome do campo
-
-        if old_file and old_file != new_file:
-            delete_old_file(old_file)    # deleta a imagem antiga do sistema de arquivos
-
-    except sender.DoesNotExist:
-        return False    # se não existir, não tem imagem antiga para deletar
 
 @receiver(pre_save, sender=Product)
 def product_pre_save_delete_old_image(sender, instance, **kwargs):
