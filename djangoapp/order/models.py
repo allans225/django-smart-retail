@@ -6,24 +6,38 @@ class Order(models.Model):
         verbose_name = "Pedido"
         verbose_name_plural = "Pedidos"
 
+    class StatusChoices(models.TextChoices):
+        PENDING = "P", "Aguardando Pagamento"
+        APPROVED = "A", "Aprovado"
+        SEPARATION = "S", "Em Separação"
+        SHIPPED = "B", "A Caminho"
+        DELIVERED = "E", "Entregue"
+        CANCELED = "C", "Cancelado"
+        REFUNDED = "R", "Reembolsado"
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Usuário")
+
+    # Detalhes Financeiros
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Subtotal")
+    shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Valor de Frete")
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Valor de Desconto")
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Preço Total do Pedido")
+    
     total_items = models.PositiveIntegerField(default=0, verbose_name="Total de Itens")
     status = models.CharField(
-        default="C", max_length=1,
-        choices=[
-            ("A", "Aprovado"),
-            ("C", "Criado"),
-            ("P", "Pendente"),
-            ("R", "Reprovado"),
-            ("E", "Enviado"),
-            ("F", "Finalizado"),
-        ],
+        max_length=1,
+        choices=StatusChoices.choices,
+        default=StatusChoices.PENDING,
         verbose_name="Status do Pedido"
     )
+
+    # Rastreamento e Logística
+    tracking_code = models.CharField(max_length=100, blank=True, null=True, verbose_name="Código de Rastreio")
+    shipping_address_snapshot = models.JSONField(blank=True, null=True, verbose_name="Endereço de Entrega (Snapshot)")
+
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
-
+    
     def __str__(self):
         return f"Pedido N. {self.pk}"
 
